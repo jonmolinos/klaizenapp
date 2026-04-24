@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Klaizen — Plataforma docente</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --or:#ff6a00;--or2:#ff8c38;--or-pale:#fff4ee;--or-glow:rgba(255,106,0,.14);
+  --dk:#16120e;--dk2:#2c241c;--mid:#7a6a5e;--muted:#b0a49a;
+  --bg:#f5f1ed;--card:#ffffff;--border:rgba(0,0,0,.08);
+  --green:#16a34a;--green-pale:#f0fdf4;--red:#dc2626;
+  --blue:#2563eb;--blue-pale:#eff6ff;
+  --r:16px;--r-sm:10px;--r-xs:8px;
+  --sh:0 2px 20px rgba(0,0,0,.06);--sh-lg:0 8px 48px rgba(0,0,0,.10);
+  --tr:.32s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dk);overflow-x:hidden}
+.screen{display:none;min-height:100vh;animation:fu .38s cubic-bezier(.4,0,.2,1) both}
+.screen.active{display:flex}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
+
+/* ═══ LOGIN ═══ */
+#s-login{flex-direction:column;align-items:center;justify-content:center;background:var(--dk);position:relative;overflow:hidden}
+#s-login::before{content:'';position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.18) 0%,transparent 65%);top:-300px;right:-250px;pointer-events:none}
+#s-login::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.10) 0%,transparent 65%);bottom:-150px;left:-150px;pointer-events:none}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:0 20px}
+.l-logo{display:flex;align-items:center;gap:11px;margin-bottom:40px}
+.l-logo-icon{width:46px;height:46px;background:var(--or);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(255,106,0,.4)}
+.l-logo-name{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px}
+.l-logo-name em{color:var(--or);font-style:normal}
+.l-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:44px 40px;backdrop-filter:blur(16px)}
+.l-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:6px}
+.l-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:34px;font-weight:400}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:8px}
+.field input{width:100%;padding:14px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color var(--tr),background var(--tr)}
+.field input::placeholder{color:rgba(255,255,255,.2)}
+.field input:focus{border-color:var(--or);background:rgba(255,106,0,.08)}
+.btn-login{width:100%;padding:16px;background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;box-shadow:0 4px 24px rgba(255,106,0,.4);transition:all var(--tr)}
+.btn-login:hover{background:var(--or2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,106,0,.5)}
+.l-hint{margin-top:18px;font-size:12px;color:rgba(255,255,255,.22);text-align:center}
+.l-hint b{color:rgba(255,255,255,.4)}
+
+/* ═══ SHELL (topbar + sidebar logic) ═══ */
+#s-main{flex-direction:column;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-icon{width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.tb-name{font-size:17px;font-weight:800;letter-spacing:-.5px}
+.tb-name em{color:var(--or);font-style:normal}
+.tb-right{display:flex;align-items:center;gap:14px}
+.tb-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:6px 14px 6px 8px;font-size:13px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s}
+.tb-pill:hover{border-color:var(--or);color:var(--or)}
+.av{width:34px;height:34px;background:var(--or-pale);border:2px solid var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--or)}
+.main-content{flex:1;max-width:1000px;margin:0 auto;padding:40px 24px 80px;width:100%}
+
+/* ═══ PAGE SECTIONS ═══ */
+.page{display:none;animation:fu .35s cubic-bezier(.4,0,.2,1) both}
+.page.active{display:block}
+
+/* ═══ GROUPS PAGE ═══ */
+.pg-header{margin-bottom:32px}
+.pg-title{font-size:28px;font-weight:800;letter-spacing:-.7px;margin-bottom:4px}
+.pg-sub{font-size:14px;color:var(--mid);font-weight:400}
+.group-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;margin-bottom:28px}
+.gc-header{padding:24px 28px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.gc-title{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.gc-meta{font-size:13px;color:var(--mid);margin-top:3px;font-weight:400}
+.gc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--or-pale);color:var(--or);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:5px 12px;border-radius:100px}
+.gc-dot{width:6px;height:6px;border-radius:50%;background:var(--or)}
+
+/* Indicators */
+.gc-body{padding:24px 28px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.indicators-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+.ind-item{background:var(--bg);border-radius:var(--r-sm);padding:14px 16px}
+.ind-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ind-name{font-size:12px;font-weight:600;color:var(--mid)}
+.ind-val{font-size:14px;font-weight:800}
+.ind-val.low{color:var(--red)}
+.ind-val.med{color:#d97706}
+.ind-val.high{color:var(--green)}
+.ind-bar{height:5px;background:rgba(0,0,0,.07);border-radius:3px;overflow:hidden}
+.ind-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1) .3s}
+.ind-fill.low{background:var(--red)}
+.ind-fill.med{background:#f59e0b}
+.ind-fill.high{background:var(--green)}
+
+/* Chart */
+.chart-wrap{background:var(--bg);border-radius:var(--r-sm);padding:20px;margin-bottom:28px;position:relative;overflow:hidden}
+.chart-canvas{width:100%;height:100px;position:relative}
+.chart-line-svg{width:100%;height:100%;overflow:visible}
+
+/* No-diagnosis banner */
+.no-diag{background:linear-gradient(135deg,#fff8f3 0%,#fff0e6 100%);border:1px solid rgba(255,106,0,.2);border-radius:var(--r-sm);padding:22px 24px;display:flex;gap:16px;align-items:flex-start;margin-bottom:28px}
+.no-diag-icon{font-size:26px;flex-shrink:0}
+.no-diag-text{font-size:14px;color:var(--dk2);line-height:1.6;font-weight:500}
+.no-diag-text strong{color:var(--or)}
+
+/* Diagnosis block */
+.diag-block{background:linear-gradient(135deg,var(--green-pale) 0%,#dcfce7 100%);border:1px solid rgba(22,163,74,.2);border-radius:var(--r-sm);padding:22px 24px;margin-bottom:28px;display:none}
+.diag-block.visible{display:block;animation:fu .4s both}
+.diag-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.diag-area{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:6px}
+.diag-summary{font-size:14px;color:#166534;font-weight:400;line-height:1.6}
+
+/* Activities */
+.activities-list{display:flex;flex-direction:column;gap:10px}
+.act-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
+.act-item:hover:not(.locked){border-color:var(--or);box-shadow:0 4px 20px rgba(255,106,0,.12);transform:translateX(3px)}
+.act-item.locked{cursor:not-allowed;opacity:.55;filter:grayscale(.5)}
+.act-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.act-icon.orange{background:var(--or-pale)}
+.act-icon.blue{background:var(--blue-pale)}
+.act-icon.grey{background:#f0ede9}
+.act-info{flex:1}
+.act-name{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:2px}
+.act-desc{font-size:12px;color:var(--mid);font-weight:400}
+.act-status{flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:100px}
+.badge.done{background:var(--green-pale);color:var(--green)}
+.badge.open{background:var(--or-pale);color:var(--or)}
+.badge.locked{background:#f0ede9;color:var(--muted)}
+.badge.new{background:#eff6ff;color:#2563eb}
+.lock-icon{font-size:16px;color:var(--muted)}
+
+/* ═══ ACTIVITY FLOW SCREEN ═══ */
+#s-activity{flex-direction:column;background:var(--bg)}
+.act-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.act-tb-left{display:flex;align-items:center;gap:12px}
+.back-btn{width:34px;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-xs);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.back-btn:hover{background:var(--card);border-color:var(--or);color:var(--or)}
+.act-tb-name{font-size:14px;font-weight:700}
+.act-tb-right{display:flex;align-items:center;gap:10px}
+.prog-bar-out{width:180px;height:5px;background:#ede8e3;border-radius:3px;overflow:hidden}
+.prog-bar-in{height:100%;background:var(--or);border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.prog-txt{font-size:12px;font-weight:600;color:var(--mid);white-space:nowrap}
+
+.flow-body{max-width:640px;margin:0 auto;padding:52px 24px 80px;width:100%}
+.step{display:none}
+.step.active{display:flex;flex-direction:column;animation:fu .38s both}
+.step-num{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--or);margin-bottom:16px}
+.step-q{font-size:26px;font-weight:800;letter-spacing:-.6px;line-height:1.25;color:var(--dk);margin-bottom:10px}
+.step-hint{font-size:14px;color:var(--mid);margin-bottom:30px;line-height:1.6;font-weight:400}
+
+/* Kahoot-style options */
+.k-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+.k-btn{padding:20px 16px;border-radius:var(--r-sm);border:none;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;transition:all .2s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:10px}
+.k-btn:hover,.k-btn.sel{transform:scale(1.04);box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.k-btn.c0{background:#fee2e2;color:#991b1b}.k-btn.c0:hover,.k-btn.c0.sel{background:#fca5a5}
+.k-btn.c1{background:#fef3c7;color:#92400e}.k-btn.c1:hover,.k-btn.c1.sel{background:#fde68a}
+.k-btn.c2{background:#dbeafe;color:#1e40af}.k-btn.c2:hover,.k-btn.c2.sel{background:#bfdbfe}
+.k-btn.c3{background:#d1fae5;color:#065f46}.k-btn.c3:hover,.k-btn.c3.sel{background:#a7f3d0}
+.k-num{width:28px;height:28px;border-radius:7px;background:rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* Scale */
+.scale-row{display:flex;gap:10px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.scale-btn{width:62px;height:62px;border-radius:14px;border:2px solid var(--border);background:var(--card);font-size:22px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.scale-btn span{font-size:9px;font-weight:700;color:var(--mid)}
+.scale-btn:hover,.scale-btn.sel{transform:scale(1.14);border-color:var(--or);background:var(--or-pale);box-shadow:0 4px 16px rgba(255,106,0,.2)}
+.scale-btn.sel span{color:var(--or)}
+
+/* Text input */
+.t-input{width:100%;padding:16px 18px;background:var(--card);border:2px solid var(--border);border-radius:var(--r-sm);font-size:15px;font-family:inherit;color:var(--dk);outline:none;resize:none;transition:border-color var(--tr);margin-bottom:28px}
+.t-input:focus{border-color:var(--or)}
+.t-input::placeholder{color:var(--muted)}
+
+/* Socio */
+.socio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:28px}
+.socio-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;cursor:pointer;text-align:center;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.socio-card:hover{border-color:var(--or);background:var(--or-pale);transform:translateY(-2px)}
+.socio-card.sel{border-color:var(--or);background:var(--or-pale)}
+.socio-av{width:40px;height:40px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff}
+.socio-name{font-size:12px;font-weight:600;color:var(--dk)}
+
+/* Buttons */
+.btn-next{padding:15px 32px;background:var(--or);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 4px 20px rgba(255,106,0,.3);transition:all var(--tr)}
+.btn-next:hover{background:var(--or2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,106,0,.4)}
+.btn-next:active{transform:translateY(0)}
+
+/* Result */
+.res-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh-lg);padding:40px 36px;text-align:center;margin-bottom:20px}
+.res-badge{display:inline-block;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:5px 14px;border-radius:100px;margin-bottom:16px}
+.res-title{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:28px}
+.thermo-row{display:flex;gap:16px;justify-content:center;align-items:center;margin-bottom:28px;flex-wrap:wrap}
+.thermo-item{flex:1;min-width:120px;max-width:160px;background:var(--bg);border-radius:var(--r-sm);padding:20px 16px;text-align:center}
+.thermo-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mid);margin-bottom:12px}
+.thermo-ring{width:88px;height:88px;position:relative;margin:0 auto 10px}
+.thermo-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.thermo-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.ring-bg{stroke:#ede8e3}
+.ring-fill{stroke-dasharray:226;stroke-dashoffset:226;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .4s}
+.ring-fill.before-ring{stroke:var(--or)}
+.ring-fill.after-ring{stroke:var(--green)}
+.thermo-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+.thermo-pct.b{color:var(--or)}.thermo-pct.a{color:var(--green)}
+.arr-big{font-size:28px;color:var(--muted);align-self:center}
+.res-msg{display:flex;align-items:center;gap:10px;justify-content:center;background:var(--green-pale);border-radius:var(--r-xs);padding:16px 20px}
+.res-msg-t{font-size:15px;font-weight:700;color:#15803d}
+.res-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.btn-outline{padding:13px 24px;background:transparent;border:2px solid var(--border);border-radius:var(--r-sm);font-size:13px;font-weight:700;font-family:inherit;color:var(--dk);cursor:pointer;transition:all var(--tr)}
+.btn-outline:hover{border-color:var(--dk);background:var(--dk);color:#fff}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .l-card{padding:34px 24px}.topbar,.act-topbar{padding:0 16px}
+  .main-content{padding:28px 16px 60px}.gc-header,.gc-body{padding:20px 18px}
+  .indicators-grid{grid-template-columns:1fr}.k-grid{grid-template-columns:1fr}
+  .flow-body{padding:36px 16px 60px}.step-q{font-size:21px}
+  .res-card{padding:30px 20px}.prog-bar-out{width:100px}
+  .socio-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+  .thermo-ring{width:72px;height:72px}.thermo-pct{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
+<section id="s-login" class="screen active">
+  <div class="login-wrap">
+    <div class="l-logo">
+      <div class="l-logo-icon">🎯</div>
+      <div class="l-logo-name">klai<em>zen</em>.eu</div>
+    </div>
+    <div class="l-card">
+      <div class="l-title">Klaizen</div>
+      <div class="l-sub">Acceso docente</div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" placeholder="tu@email.com" id="f-email"/>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" placeholder="••••••••" id="f-pass"/>
+      </div>
+      <button class="btn-login" onclick="gotoMain()">Acceder →</button>
+      <div class="l-hint">Demo: usa cualquier email y contraseña</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ MAIN APP ═══════════════════════════ -->
+<section id="s-main" class="screen">
+  <header class="topbar">
+    <div class="tb-left">
+      <div class="tb-icon">🎯</div>
+      <div class="tb-name">klai<em>zen</em></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-pill" onclick="logout()">← Salir</div>
+      <div class="av">LM</div>
+    </div>
+  </header>
+  <div class="main-content">
+    <!-- GROUPS PAGE -->
+    <div class="page active" id="pg-groups">
+      <div class="pg-header">
+        <div class="pg-title">Mis grupos</div>
+        <div class="pg-sub">Curso 2024–25 · IES Valle Verde</div>
+      </div>
+      <div class="group-card" id="group-card">
+        <!-- Header -->
+        <div class="gc-header">
+          <div>
+            <div class="gc-title">3º ESO B</div>
+            <div class="gc-meta">24 alumnos · Ciencias Sociales</div>
+          </div>
+          <div class="gc-badge"><div class="gc-dot"></div>Activo</div>
+        </div>
+        <div class="gc-body">
+
+          <!-- INDICATORS -->
+          <div class="section-label">📊 Indicadores actuales</div>
+          <div class="indicators-grid" id="indicators-grid"></div>
+
+          <!-- CHART -->
+          <div class="section-label">📈 Evolución (últimas 8 semanas)</div>
+          <div class="chart-wrap">
+            <div class="chart-canvas">
+              <svg class="chart-line-svg" id="chart-svg" viewBox="0 0 600 100" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+
+          <!-- NO DIAG BANNER -->
+          <div class="no-diag" id="no-diag-banner">
+            <div class="no-diag-icon">🔍</div>
+            <div class="no-diag-text">
+              <strong>Esta clase aún no tiene diagnóstico.</strong><br>
+              Realiza la <strong>Evaluación</strong> y el <strong>Sociograma</strong> para obtener una visión completa del grupo.
+            </div>
+          </div>
+
+          <!-- DIAG BLOCK (hidden until both done) -->
+          <div class="diag-block" id="diag-block">
+            <div class="diag-title">✅ Diagnóstico del aula</div>
+            <div class="diag-area">Área principal a mejorar: <strong>Cohesión del grupo</strong></div>
+            <div class="diag-summary">Se detecta baja conexión entre alumnos y oportunidades de mejora significativas en las relaciones interpersonales y el sentido de pertenencia.</div>
+          </div>
+
+          <!-- ACTIVITIES -->
+          <div class="section-label">🔓 Actividades disponibles</div>
+          <div class="activities-list" id="activities-list"></div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ ACTIVITY FLOW ═══════════════════════════ -->
+<section id="s-activity" class="screen">
+  <header class="act-topbar">
+    <div class="act-tb-left">
+      <button class="back-btn" onclick="backToMain()">←</button>
+      <div class="act-tb-name" id="act-flow-name">Actividad</div>
+    </div>
+    <div class="act-tb-right">
+      <div class="prog-bar-out"><div class="prog-bar-in" id="prog-in" style="width:0%"></div></div>
+      <div class="prog-txt" id="prog-txt">Paso 1</div>
+    </div>
+  </header>
+  <div class="flow-body" id="flow-body"></div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const state = {
+  evalDone: false,
+  socioDone: false,
+  currentFlow: null,
+  currentStep: 0,
+  steps: []
+};
+
+const INDICATORS = [
+  {name:'Motivación',    val:2.9, max:5},
+  {name:'Bienestar',     val:3.6, max:5},
+  {name:'Pertenencia',   val:2.4, max:5},
+  {name:'Autoconfianza', val:2.8, max:5},
+  {name:'Relaciones',    val:2.3, max:5},
+  {name:'Estrés',        val:3.9, max:5},
+];
+
+const STUDENTS = ['Alba R.','Bruno M.','Carmen S.','Diego F.','Elena P.',
+                  'Fernando L.','Gema T.','Hugo V.','Inés C.','Javier N.',
+                  'Karla D.','Luis B.'];
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function gotoMain(){showScreen('s-main');renderGroups()}
+function logout(){showScreen('s-login')}
+function backToMain(){showScreen('s-main');renderGroups()}
+
+// ═══════════════════════════════════════════════════
+//  RENDER GROUPS PAGE
+// ═══════════════════════════════════════════════════
+function renderGroups(){
+  renderIndicators();
+  renderChart();
+  renderActivities();
+  // diag visibility
+  const both = state.evalDone && state.socioDone;
+  document.getElementById('no-diag-banner').style.display = both ? 'none' : 'flex';
+  document.getElementById('diag-block').classList.toggle('visible', both);
+}
+
+function renderIndicators(){
+  const grid = document.getElementById('indicators-grid');
+  grid.innerHTML = '';
+  INDICATORS.forEach(ind => {
+    const pct = (ind.val / ind.max) * 100;
+    const cls = pct < 50 ? 'low' : pct < 70 ? 'med' : 'high';
+    grid.innerHTML += `
+      <div class="ind-item">
+        <div class="ind-top">
+          <span class="ind-name">${ind.name}</span>
+          <span class="ind-val ${cls}">${ind.val}</span>
+        </div>
+        <div class="ind-bar"><div class="ind-fill ${cls}" style="width:0%" data-w="${pct}%"></div></div>
+      </div>`;
+  });
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      grid.querySelectorAll('.ind-fill').forEach(el=>{
+        el.style.width = el.dataset.w;
+      });
+    }, 80);
+  });
+}
+
+function renderChart(){
+  const svg = document.getElementById('chart-svg');
+  const pts = [18,45,38,52,47,61,58,72];
+  const w=600, h=100, pad=10;
+  const xs = pts.map((_,i)=> pad + i*(w-pad*2)/(pts.length-1));
+  const ys = pts.map(v=> h - pad - (v/100)*(h-pad*2));
+
+  // gradient fill
+  let d = `M ${xs[0]} ${ys[0]}`;
+  for(let i=1;i<pts.length;i++){
+    const cpx=(xs[i-1]+xs[i])/2;
+    d+=` C ${cpx} ${ys[i-1]}, ${cpx} ${ys[i]}, ${xs[i]} ${ys[i]}`;
+  }
+  const fill = d + ` L ${xs[xs.length-1]} ${h} L ${xs[0]} ${h} Z`;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ff6a00" stop-opacity=".18"/>
+        <stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${fill}" fill="url(#cg)"/>
+    <path d="${d}" fill="none" stroke="#ff6a00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pts.map((v,i)=>`<circle cx="${xs[i]}" cy="${ys[i]}" r="4" fill="#ff6a00" opacity=".8"/>`).join('')}
+    ${pts.map((v,i)=>`<text x="${xs[i]}" y="${ys[i]-8}" text-anchor="middle" font-size="9" fill="#ff6a00" font-family="Plus Jakarta Sans" font-weight="700">${v}</text>`).join('')}
+  `;
+}
+
+function renderActivities(){
+  const both = state.evalDone && state.socioDone;
+  const list = document.getElementById('activities-list');
+  const acts = [
+    {
+      id:'eval', icon:'📋', iconCls:'orange', name:'Evaluación',
+      desc:'Mide el estado emocional y motivacional del grupo',
+      status: state.evalDone ? 'done' : 'open',
+      locked: false, flow:'eval'
+    },
+    {
+      id:'socio', icon:'🕸️', iconCls:'blue', name:'Sociograma',
+      desc:'Analiza las relaciones y conexiones entre alumnos',
+      status: state.socioDone ? 'done' : 'open',
+      locked: false, flow:'socio'
+    },
+    {
+      id:'rec', icon:'🤝', iconCls:'grey', name:'Reconectar el grupo',
+      desc:'Actividad de cohesión y confianza grupal',
+      status: both ? 'new' : 'locked', locked: !both, flow:'reconect'
+    },
+    {
+      id:'mot', icon:'⚡', iconCls:'grey', name:'Mejorar motivación',
+      desc:'Dinámicas para activar la motivación intrínseca',
+      status: both ? 'open' : 'locked', locked: !both, flow:'motivacion'
+    },
+    {
+      id:'conf', icon:'💬', iconCls:'grey', name:'Dinámica de confianza',
+      desc:'Ejercicios para fortalecer vínculos en el aula',
+      status: both ? 'open' : 'locked', locked: !both, flow:'confianza'
+    },
+  ];
+
+  list.innerHTML = acts.map(a => {
+    const badgeMap = {done:'✓ Completado',open:'Iniciar',new:'⭐ Recomendada',locked:'🔒 Bloqueado'};
+    const badgeText = badgeMap[a.status];
+    return `
+    <div class="act-item ${a.locked?'locked':''}" onclick="${a.locked?'':'launchFlow(\''+a.flow+'\',\''+a.name+'\')'}">
+      <div class="act-icon ${a.iconCls}">${a.icon}</div>
+      <div class="act-info">
+        <div class="act-name">${a.name}</div>
+        <div class="act-desc">${a.desc}</div>
+      </div>
+      <div class="act-status">
+        <span class="badge ${a.status}">${badgeText}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  FLOW DEFINITIONS
+// ═══════════════════════════════════════════════════
+const FLOWS = {
+  eval: [
+    {type:'intro', q:'Evaluación del grupo', hint:'Esta evaluación nos ayuda a entender el estado emocional y motivacional de la clase. Responde con sinceridad, no hay respuestas correctas.'},
+    {type:'scale', q:'¿Cómo de motivado/a te sientes en clase últimamente?', emojis:['😞','😐','🙂','😊','🤩'], labels:['Nada','Poco','Regular','Bien','Mucho']},
+    {type:'k4', q:'¿Cuál describe mejor el ambiente en clase?', opts:['Tenso y difícil','Indiferente','Tranquilo','Positivo y activo']},
+    {type:'k4', q:'¿Te sientes parte del grupo?', opts:['Para nada','Poco','Bastante','Totalmente']},
+    {type:'text', q:'¿Qué cambiarías del ambiente de la clase?', ph:'Escribe lo que pienses...'},
+    {type:'scale', q:'¿Cómo valoras las relaciones con tus compañeros?', emojis:['😞','😐','🙂','😊','🤩'], labels:['Muy mal','Mal','Regular','Bien','Muy bien']},
+    {type:'k4', q:'¿El estrés en clase es…?', opts:['Muy alto','Alto','Manejable','Bajo']},
+    {type:'result', evalResult:true}
+  ],
+  socio: [
+    {type:'intro', q:'Sociograma del grupo', hint:'Selecciona a los compañeros/as con quienes más te relacionas o con quienes trabajarías mejor.'},
+    {type:'socio', q:'¿Con quién trabajarías en un proyecto?', hint:'Selecciona hasta 3 compañeros/as', max:3},
+    {type:'socio', q:'¿A quién acudes cuando necesitas ayuda?', hint:'Selecciona 1 o 2 compañeros/as', max:2},
+    {type:'socio', q:'¿Quién crees que ayuda más al buen ambiente del grupo?', hint:'Selecciona hasta 2 compañeros/as', max:2},
+    {type:'result', socioResult:true}
+  ],
+  reconect: [
+    {type:'intro', q:'Reconectar el grupo 🤝', hint:'Vamos a trabajar la cohesión y el sentido de pertenencia del grupo.'},
+    {type:'text', q:'¿Qué valoras de esta clase cuando el ambiente es bueno?', ph:'Comparte lo que pienses...'},
+    {type:'k4', q:'¿Qué puedes hacer tú esta semana?', opts:['Escuchar más','Ayudar más','Participar','Respetar siempre']},
+    {type:'scale', q:'¿Cómo sientes el ambiente ahora?', emojis:['😞','😐','🙂','😊','🤩'], labels:['Muy mal','Mal','Regular','Bien','Muy bien']},
+    {type:'result'}
+  ],
+  motivacion: [
+    {type:'intro', q:'Mejorar la motivación ⚡', hint:'Actividades para despertar la motivación intrínseca del grupo.'},
+    {type:'k4', q:'¿Qué te motiva más en clase?', opts:['Aprender cosas nuevas','Los trabajos en grupo','Los retos difíciles','La libertad de crear']},
+    {type:'text', q:'¿Qué tipo de actividades te gustaría hacer más?', ph:'Describe qué actividades te gustarían...'},
+    {type:'result'}
+  ],
+  confianza: [
+    {type:'intro', q:'Dinámica de confianza 💬', hint:'Ejercicios para fortalecer los vínculos y la confianza dentro del grupo.'},
+    {type:'text', q:'Escribe algo positivo sobre un compañero o compañera', ph:'Puede ser algo pequeño, pero genuino...'},
+    {type:'k4', q:'¿Qué fortalece más la confianza en tu clase?', opts:['Ser honesto','Cumplir promesas','Escuchar sin juzgar','Pedir ayuda']},
+    {type:'result'}
+  ]
+};
+
+// ═══════════════════════════════════════════════════
+//  LAUNCH FLOW
+// ═══════════════════════════════════════════════════
+function launchFlow(flowId, name){
+  state.currentFlow = flowId;
+  state.currentStep = 0;
+  state.steps = FLOWS[flowId];
+  document.getElementById('act-flow-name').textContent = name;
+  showScreen('s-activity');
+  renderStep();
+}
+
+function renderStep(){
+  const s = state.steps[state.currentStep];
+  const total = state.steps.length;
+  const pct = (state.currentStep / (total-1)) * 100;
+  document.getElementById('prog-in').style.width = pct+'%';
+  document.getElementById('prog-txt').textContent = `Paso ${state.currentStep+1} de ${total}`;
+
+  const body = document.getElementById('flow-body');
+  body.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'step active';
+  div.innerHTML = buildStep(s, state.currentStep+1);
+  body.appendChild(div);
+  window.scrollTo(0,0);
+
+  if(s.type==='result') animateRings();
+}
+
+function buildStep(s, n){
+  if(s.type==='intro'){
+    return `
+      <div class="step-num">Paso ${n}</div>
+      <div class="step-q">${s.q}</div>
+      <div class="step-hint">${s.hint}</div>
+      <button class="btn-next" onclick="nextStep()">Empezar →</button>`;
+  }
+  if(s.type==='k4'){
+    const colors=['c0','c1','c2','c3'];
+    const nums=['A','B','C','D'];
+    return `
+      <div class="step-num">Paso ${n}</div>
+      <div class="step-q">${s.q}</div>
+      <div class="k-grid">
+        ${s.opts.map((o,i)=>`<button class="k-btn ${colors[i]}" onclick="selK(this,${i})"><span class="k-num">${nums[i]}</span>${o}</button>`).join('')}
+      </div>
+      <button class="btn-next" onclick="nextStep()">Siguiente →</button>`;
+  }
+  if(s.type==='scale'){
+    return `
+      <div class="step-num">Paso ${n}</div>
+      <div class="step-q">${s.q}</div>
+      <div class="scale-row">
+        ${s.emojis.map((e,i)=>`<button class="scale-btn" onclick="selScale(this)"><span style="font-size:24px">${e}</span><span>${s.labels[i]}</span></button>`).join('')}
+      </div>
+      <button class="btn-next" onclick="nextStep()">Siguiente →</button>`;
+  }
+  if(s.type==='text'){
+    return `
+      <div class="step-num">Paso ${n}</div>
+      <div class="step-q">${s.q}</div>
+      <textarea class="t-input" rows="4" placeholder="${s.ph}"></textarea>
+      <button class="btn-next" onclick="nextStep()">Siguiente →</button>`;
+  }
+  if(s.type==='socio'){
+    const avColors=['#ef4444','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16','#06b6d4','#e11d48'];
+    return `
+      <div class="step-num">Paso ${n}</div>
+      <div class="step-q">${s.q}</div>
+      <div class="step-hint">${s.hint}</div>
+      <div class="socio-grid">
+        ${STUDENTS.map((st,i)=>`
+          <div class="socio-card" onclick="selSocio(this,${s.max})">
+            <div class="socio-av" style="background:${avColors[i]}">${st.charAt(0)}</div>
+            <div class="socio-name">${st}</div>
+          </div>`).join('')}
+      </div>
+      <button class="btn-next" onclick="nextStep()">Siguiente →</button>`;
+  }
+  if(s.type==='result'){
+    const isEval = s.evalResult;
+    const isSocio = s.socioResult;
+    return `
+      <div class="res-card">
+        <div class="res-badge">${isEval?'📋 Evaluación':isSocio?'🕸️ Sociograma':'✅ Actividad'} completada</div>
+        <div class="res-title">${isEval?'Evaluación registrada':isSocio?'Sociograma registrado':'¡Actividad completada!'}</div>
+        <div class="thermo-row">
+          <div class="thermo-item">
+            <div class="thermo-lbl">Antes</div>
+            <div class="thermo-ring">
+              <svg viewBox="0 0 88 88"><circle class="ring-bg" cx="44" cy="44" r="36"/><circle class="ring-fill before-ring" id="ring-before" cx="44" cy="44" r="36"/></svg>
+              <div class="thermo-pct b">52%</div>
+            </div>
+          </div>
+          <div class="arr-big">→</div>
+          <div class="thermo-item">
+            <div class="thermo-lbl">Ahora</div>
+            <div class="thermo-ring">
+              <svg viewBox="0 0 88 88"><circle class="ring-bg" cx="44" cy="44" r="36"/><circle class="ring-fill after-ring" id="ring-after" cx="44" cy="44" r="36"/></svg>
+              <div class="thermo-pct a">61%</div>
+            </div>
+          </div>
+        </div>
+        <div class="res-msg"><span style="font-size:20px">✅</span><span class="res-msg-t">Mejora detectada · +9 puntos de clima emocional</span></div>
+      </div>
+      <div class="res-actions">
+        <button class="btn-next" onclick="completeFlow()">Volver al grupo →</button>
+        <button class="btn-outline">Descargar informe</button>
+      </div>`;
+  }
+  return '';
+}
+
+function nextStep(){
+  state.currentStep++;
+  if(state.currentStep >= state.steps.length) state.currentStep = state.steps.length-1;
+  renderStep();
+}
+
+function completeFlow(){
+  if(state.currentFlow==='eval') state.evalDone=true;
+  if(state.currentFlow==='socio') state.socioDone=true;
+  backToMain();
+}
+
+function animateRings(){
+  // circ = 2*pi*36 ≈ 226.2
+  const circ = 226.2;
+  setTimeout(()=>{
+    const b=document.getElementById('ring-before');
+    const a=document.getElementById('ring-after');
+    if(b) b.style.strokeDashoffset = circ*(1-0.52);
+    if(a) a.style.strokeDashoffset = circ*(1-0.61);
+  },200);
+}
+
+// ── Selectors ──
+function selK(btn, idx){
+  btn.closest('.k-grid').querySelectorAll('.k-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function selScale(btn){
+  btn.closest('.scale-row').querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function selSocio(card, max){
+  const grid = card.closest('.socio-grid');
+  const sel = grid.querySelectorAll('.sel');
+  if(card.classList.contains('sel')){card.classList.remove('sel');return;}
+  if(sel.length < max) card.classList.add('sel');
+}
+</script>
+</body>
+</html>
