@@ -1,1201 +1,789 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Klaizen — Plataforma docente</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Klaizen — Clima de Aula</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --or:#f36a15;--or2:#f58040;--or-pale:#fff4ee;
-  --dk:#1a1a1a;--mid:#6b7280;--muted:#9ca3af;
-  --bg:#ffffff;--card:#ffffff;--border:rgba(0,0,0,.08);
-  --green:#16a34a;--green-pale:#f0fdf4;--red:#dc2626;--blue:#2563eb;--blue-pale:#eff6ff;
-  --r:16px;--r-sm:10px;--r-xs:8px;
-  --tr:.32s cubic-bezier(.4,0,.2,1);
+  --orange:#F36A15;--orange-d:#D4560E;--orange-pale:#FFF3EB;--orange-pale2:#FFE8D4;
+  --green:#4A7A46;--green-d:#3A6037;--green-pale:#EEF6ED;
+  --slate:#464646;--slate-mid:#6B7A8D;--slate-light:#9AA5B4;--slate-pale:#F5F7FA;
+  --border:#E8ECF2;--white:#FFFFFF;
+  --red:#D94040;--red-pale:#FDECEC;
+  --amber:#C97A10;--amber-pale:#FFF6E6;
+  --shadow-xs:0 1px 3px rgba(0,0,0,.07);--shadow-sm:0 2px 8px rgba(0,0,0,.09);
+  --shadow-md:0 6px 20px rgba(0,0,0,.11);--shadow-lg:0 12px 40px rgba(0,0,0,.14);
+  --r:12px;--r-lg:18px
 }
-html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dk);overflow-x:hidden}
-.screen{display:none;min-height:100vh;animation:fu .38s cubic-bezier(.4,0,.2,1) both}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--slate-pale);color:var(--slate);font-size:15px;line-height:1.5}
+
+.screen{display:none;height:100dvh;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
-@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes spin{to{transform:rotate(360deg)}}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
 
-/* ═══ SHARED BTN ═══ */
-.btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;border-radius:12px;transition:all var(--tr);display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn-or{background:var(--or);color:#fff;box-shadow:0 4px 22px rgba(255,106,0,.38)}
-.btn-or:hover{background:var(--or2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,106,0,.5)}
-.btn-ghost{background:#f5f5f5;border:1px solid var(--border);color:#374151}
-.btn-ghost:hover{background:#ececec;transform:translateY(-2px)}
+/* LOGIN */
+#s-login{background:linear-gradient(150deg,#2E3A47 0%,#1A232C 100%);align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--white);border-radius:var(--r-lg);padding:48px 40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:fadeUp .45s ease both}
+.logo-center{display:flex;justify-content:center;margin-bottom:40px}
+.logo-center svg{height:46px;width:auto}
+.login-label{font-size:18px;font-weight:600;color:var(--slate);text-align:center;margin-bottom:4px}
+.login-sublabel{font-size:13px;color:var(--slate-light);text-align:center;margin-bottom:32px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--slate-mid);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.field input{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--r);font-size:15px;font-family:inherit;color:var(--slate);outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--orange)}
+.btn-primary{width:100%;padding:14px 20px;background:var(--orange);color:var(--white);border:none;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--orange-d)}
+.btn-primary:active{transform:scale(.98)}
+.login-note{font-size:12px;color:var(--slate-light);text-align:center;margin-top:14px}
 
-/* ═══ LOGIN (TEACHER) ═══ */
-#s-login{flex-direction:column;align-items:center;justify-content:center;background:#fff;position:relative;overflow:hidden}
-#s-login::before{content:'';position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(243,106,21,.07) 0%,transparent 65%);top:-300px;right:-250px;pointer-events:none}
-#s-login::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(243,106,21,.05) 0%,transparent 65%);bottom:-150px;left:-150px;pointer-events:none}
-.l-wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:0 20px}
-.l-logo{display:flex;align-items:center;gap:11px;margin-bottom:40px}
-.l-logo-icon{width:46px;height:46px;background:var(--or);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(255,106,0,.4)}
-.l-logo-name{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px}.l-logo-name em{color:var(--or);font-style:normal}
-.l-card{background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:24px;padding:44px 40px;box-shadow:0 4px 32px rgba(0,0,0,.08)}
-.l-title{font-size:22px;font-weight:800;color:#1a1a1a;letter-spacing:-.4px;margin-bottom:6px}
-.l-sub{font-size:13px;color:#9ca3af;margin-bottom:34px}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:8px}
-.field input{width:100%;padding:14px 16px;background:#f9fafb;border:1px solid rgba(0,0,0,.1);border-radius:var(--r-sm);color:#1a1a1a;font-size:14px;font-family:inherit;outline:none;transition:border-color var(--tr),background var(--tr)}
-.field input::placeholder{color:#c4c4c4}
-.field input:focus{border-color:var(--or);background:#fff8f4}
-.l-hint{margin-top:18px;font-size:12px;color:#c4c4c4;text-align:center}
-.l-student-link{margin-top:24px;text-align:center;font-size:13px;color:#9ca3af}
-.l-student-link a{color:var(--or);cursor:pointer;font-weight:700;text-decoration:none}
-.l-student-link a:hover{text-decoration:underline}
+/* APP SHELL */
+#s-app{background:var(--slate-pale)}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50}
+.topbar-logo{height:36px;width:auto}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.user-chip{font-size:12px;color:var(--slate-mid);background:var(--slate-pale);padding:5px 10px;border-radius:20px;border:1px solid var(--border)}
+.btn-ghost{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;background:transparent;color:var(--slate-mid);transition:all .2s}
+.btn-ghost:hover{background:var(--slate-pale)}
 
-/* ═══ GROUP SELECTOR ═══ */
-#s-groups{flex-direction:column;background:#fff;position:relative;overflow:hidden}
-#s-groups::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(243,106,21,.05) 0%,transparent 65%);top:-200px;right:-100px;pointer-events:none}
-.gs-bar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;border-bottom:1px solid var(--border);background:#fff}
-.logo-s{display:flex;align-items:center;gap:10px}
-.logo-s-icon{width:32px;height:32px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
-.logo-s-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.5px}.logo-s-name em{color:var(--or);font-style:normal}
-.gs-av{width:32px;height:32px;background:var(--or-pale);border:2px solid var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--or)}
-.gs-body{max-width:900px;margin:0 auto;padding:52px 24px 80px;width:100%;position:relative;z-index:1}
-.gs-hey{font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-.gs-title{font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-1.2px;margin-bottom:6px}
-.gs-sub{font-size:15px;color:#9ca3af;margin-bottom:48px}
-.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.g-tile{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px 26px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.05)}
-.g-tile::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(243,106,21,.08) 0%,transparent 60%);opacity:0;transition:opacity var(--tr)}
-.g-tile:hover{border-color:rgba(243,106,21,.4);transform:translateY(-5px);box-shadow:0 16px 48px rgba(243,106,21,.12)}
-.g-tile:hover::before{opacity:1}
-.g-tile:hover .g-arrow{background:var(--or);color:#fff;transform:translateX(3px)}
-.g-subj{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,106,0,.75);margin-bottom:12px}
-.g-name{font-size:28px;font-weight:900;color:#1a1a1a;letter-spacing:-1.2px;margin-bottom:5px}
-.g-meta{font-size:13px;color:#9ca3af;margin-bottom:20px}
-.g-stats{display:flex;gap:20px}
-.g-sv{font-size:20px;font-weight:900;margin-bottom:3px}.g-sv.warn{color:#fbbf24}.g-sv.ok{color:#4ade80}.g-sv.w{color:#fff}
-.g-sl{font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.g-arrow{position:absolute;bottom:22px;right:22px;width:34px;height:34px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:#9ca3af;transition:all var(--tr)}
-/* Launch badge on tiles */
-.g-launch-badge{position:absolute;top:18px;right:18px;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;letter-spacing:.06em;text-transform:uppercase}
+/* TAB NAV */
+.tab-nav{display:flex;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.tab-btn{flex:1;padding:0 4px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;font-family:inherit;cursor:pointer;color:var(--slate-light);transition:color .2s;position:relative}
+.tab-btn.active{color:var(--orange)}
+.tab-btn .t-icon{font-size:20px}
+.tab-btn .t-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:14%;right:14%;height:2.5px;border-radius:2px 2px 0 0;background:var(--orange);transform:scaleX(0);transition:transform .25s}
+.tab-btn.active::after{transform:scaleX(1)}
+.notif-dot{width:7px;height:7px;background:var(--orange);border-radius:50%;position:absolute;top:8px;right:20px}
 
-/* ═══ DASHBOARD ═══ */
-#s-main{flex-direction:column;background:var(--bg)}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.tb-l{display:flex;align-items:center;gap:10px}
-.tb-icon{width:34px;height:34px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.tb-name{font-size:17px;font-weight:800;letter-spacing:-.5px}.tb-name em{color:var(--or);font-style:normal}
-.tb-bc{display:flex;align-items:center;gap:8px;margin-left:16px;padding-left:16px;border-left:1px solid var(--border)}
-.tb-bc-link{font-size:13px;color:var(--mid);font-weight:600;cursor:pointer;transition:color .2s}
-.tb-bc-link:hover{color:var(--or)}
-.tb-bc-sep{font-size:13px;color:var(--muted)}
-.tb-bc-cur{font-size:13px;font-weight:700;color:var(--dk)}
-.tb-r{display:flex;align-items:center;gap:12px}
-.tb-pill{background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s}
-.tb-pill:hover{border-color:var(--or);color:var(--or)}
-.av{width:34px;height:34px;background:var(--or-pale);border:2px solid var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--or)}
-.mc{flex:1;max-width:1000px;margin:0 auto;padding:36px 24px 80px;width:100%}
-.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
-.pg-hdr{margin-bottom:28px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.pg-title{font-size:28px;font-weight:900;letter-spacing:-.8px;margin-bottom:4px}
-.pg-sub{font-size:14px;color:var(--mid)}
-.pg-badge{display:inline-flex;align-items:center;gap:6px;background:var(--or-pale);color:var(--or);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:6px 14px;border-radius:100px}
-.pg-bdot{width:6px;height:6px;border-radius:50%;background:var(--or);animation:pulse 2s infinite}
+/* CONTENT */
+.tab-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.tab-pane{display:none;padding:20px 20px 50px;max-width:680px;margin:0 auto}
+.tab-pane.active{display:block}
 
-/* Indicators */
-.ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
-.ind-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 18px;position:relative;overflow:hidden}
-.ind-item::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
-.ind-item.low::before{background:var(--red)}.ind-item.med::before{background:#f59e0b}.ind-item.high::before{background:var(--green)}
-.ind-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.ind-n{font-size:12px;font-weight:600;color:var(--mid)}
-.ind-v{font-size:22px;font-weight:900;letter-spacing:-1px}
-.ind-v .den{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0}
-.ind-v.low{color:var(--red)}.ind-v.med{color:#d97706}.ind-v.high{color:var(--green)}
-.ind-bar{height:4px;background:rgba(0,0,0,.06);border-radius:2px;overflow:hidden}
-.ind-fill{height:100%;border-radius:2px;transition:width 1.3s cubic-bezier(.4,0,.2,1) .2s}
-.ind-fill.low{background:var(--red)}.ind-fill.med{background:#f59e0b}.ind-fill.high{background:var(--green)}
+/* SHARED */
+.page-title{font-size:21px;font-weight:700;color:var(--slate);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--slate-mid);margin-bottom:20px}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-xs);padding:20px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:600;color:var(--slate);margin-bottom:3px}
+.card-sub{font-size:13px;color:var(--slate-mid);margin-bottom:14px}
+.sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--slate-mid);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.divider{height:1px;background:var(--border);margin:18px 0}
 
-/* Chart */
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:20px 22px;margin-bottom:28px}
-.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.chart-ttl{font-size:13px;font-weight:700}
-.chart-leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mid);font-weight:600}
-.chart-dot{width:8px;height:8px;border-radius:50%;background:var(--or)}
-.chart-cv{width:100%;height:90px}.chart-cv svg{width:100%;height:100%;overflow:visible}
+/* SLIDERS */
+.slider-row{margin-bottom:14px}
+.slider-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.slider-head span{font-size:13px;font-weight:500;color:var(--slate)}
+.slider-val{font-size:12px;font-weight:700;color:var(--orange);background:var(--orange-pale);padding:2px 8px;border-radius:6px;min-width:28px;text-align:center}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;box-shadow:0 0 0 3px rgba(243,106,21,.18)}
 
-/* Banners */
-.no-diag{background:linear-gradient(135deg,#fff8f3,#fff0e6);border:1px solid rgba(255,106,0,.2);border-radius:var(--r-sm);padding:20px 22px;display:flex;gap:14px;align-items:flex-start;margin-bottom:28px}
-.no-diag-ico{font-size:22px;flex-shrink:0;margin-top:2px}
-.no-diag-txt{font-size:13px;color:#2c241c;line-height:1.65;font-weight:500}
-.no-diag-txt strong{color:var(--or)}
-.diag-blk{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid rgba(22,163,74,.2);border-radius:var(--r-sm);padding:20px 22px;margin-bottom:28px;display:none}
-.diag-blk.on{display:block;animation:fu .4s both}
-.diag-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:10px}
-.diag-area{font-size:15px;font-weight:700;margin-bottom:4px}
-.diag-sum{font-size:13px;color:#166534;line-height:1.6}
+/* RADIO PILLS */
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.radio-pill input[type=radio]{display:none}
+.radio-pill label{display:block;padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--slate-mid)}
+.radio-pill input:checked+label{border-color:var(--orange);background:var(--orange-pale);color:var(--orange)}
 
-/* Activities */
-.acts{display:flex;flex-direction:column;gap:10px}
-.act{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all var(--tr)}
-.act:hover:not(.locked){border-color:var(--or);box-shadow:0 4px 20px rgba(255,106,0,.1);transform:translateX(3px)}
-.act.locked{cursor:not-allowed;opacity:.45;filter:grayscale(.6)}
-.act-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.act-ico.or{background:var(--or-pale)}.act-ico.bl{background:var(--blue-pale)}.act-ico.gr{background:#f0ede9}
-.act-inf{flex:1}
-.act-nm{font-size:13px;font-weight:700;margin-bottom:2px}
-.act-ds{font-size:12px;color:var(--mid)}
-.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:100px}
-.badge.done{background:var(--green-pale);color:var(--green)}.badge.open{background:var(--or-pale);color:var(--or)}
-.badge.locked{background:#f0ede9;color:var(--muted)}.badge.new{background:#eff6ff;color:var(--blue)}
+/* INPUTS */
+.inp{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--slate);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--orange)}
 
-/* Launch button in activity row */
-.act-launch{background:var(--or);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.04em;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .2s}
-.act-launch:hover{background:var(--or2);transform:scale(1.05)}
+/* STEP INDICATOR */
+.steps{display:flex;align-items:center;gap:6px;margin-bottom:20px}
+.step-dot{width:26px;height:26px;border-radius:50%;background:#E8ECF2;color:var(--slate-light);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
+.step-dot.active{background:var(--orange);color:var(--white)}
+.step-dot.done{background:var(--green);color:var(--white);font-size:13px}
+.step-line{flex:1;height:2px;background:#E8ECF2;transition:background .3s}
+.step-line.done{background:var(--green)}
 
-/* ═══ LOBBY (teacher projects this) ═══ */
-#s-lobby{flex-direction:column;background:#fff}
-.lobby-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;background:#fff;border-bottom:1px solid var(--border)}
-.lobby-bar-l{display:flex;align-items:center;gap:12px}
-.lobby-back{width:32px;height:32px;background:#f5f5f5;border:1px solid var(--border);border-radius:var(--r-xs);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:all .2s}
-.lobby-back:hover{background:var(--or-pale);border-color:var(--or);color:var(--or)}
-.lobby-act-name{font-size:13px;font-weight:700;color:#6b7280}
-.lobby-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:32px}
-/* Big code display */
-.lobby-join-card{background:#fff;border:2px solid var(--border);border-radius:24px;padding:40px 48px;text-align:center;min-width:340px;box-shadow:0 4px 32px rgba(0,0,0,.08)}
-.lj-url{font-size:14px;font-weight:800;color:rgba(255,106,0,.9);letter-spacing:.04em;margin-bottom:16px;text-transform:uppercase}
-.lj-instr{font-size:13px;color:#6b7280;margin-bottom:28px;line-height:1.6}
-.lj-code-label{font-size:11px;font-weight:700;color:#9ca3af;margin-bottom:10px;text-transform:uppercase;letter-spacing:.1em}
-.lj-code{font-size:72px;font-weight:900;color:#1a1a1a;letter-spacing:14px;margin-bottom:8px;line-height:1}
-.lj-code-sub{font-size:12px;color:#9ca3af;font-weight:500}
-/* Students joined panel */
-.lobby-students{max-width:600px;width:100%;text-align:center}
-.ls-count{font-size:14px;font-weight:700;color:#6b7280;margin-bottom:16px}
-.ls-count span{color:#1a1a1a;font-size:18px}
-.ls-avatars{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:60px;margin-bottom:24px}
-.ls-av{animation:pop .35s cubic-bezier(.34,1.56,.64,1) both;display:flex;flex-direction:column;align-items:center;gap:5px}
-.ls-av-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;border:2px solid rgba(255,255,255,.3)}
-.ls-av-name{font-size:10px;color:#6b7280;font-weight:600;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ls-waiting{font-size:14px;color:#9ca3af;font-style:italic}
-.lobby-start-btn{padding:20px 60px;font-size:18px;border-radius:16px;letter-spacing:.02em}
-.lobby-start-btn:disabled{opacity:.4;cursor:not-allowed;transform:none !important}
+/* BUTTONS */
+.btn-sec{padding:12px 20px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;background:var(--white);color:var(--slate);transition:all .2s}
+.btn-sec:hover{border-color:var(--slate-mid)}
+.btn-green{width:100%;padding:14px;background:var(--green);color:var(--white);border:none;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+.btn-green:hover{background:var(--green-d)}
 
-/* ═══ ACTIVITY PROJECTION (teacher) ═══ */
-#s-activity{flex-direction:column;background:#fff}
-.proj-bar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.proj-bar-l{display:flex;align-items:center;gap:12px}
-.proj-back{width:32px;height:32px;background:#f5f5f5;border:1px solid var(--border);border-radius:var(--r-xs);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:all .2s}
-.proj-back:hover{background:var(--or-pale);border-color:var(--or);color:var(--or)}
-.proj-act-name{font-size:13px;font-weight:700;color:#6b7280}
-.proj-bar-r{display:flex;align-items:center;gap:14px}
-.proj-pill{display:flex;align-items:center;gap:6px;background:var(--or-pale);border:1px solid rgba(243,106,21,.3);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--or);text-transform:uppercase;letter-spacing:.06em}
-.proj-dot{width:6px;height:6px;border-radius:50%;background:var(--or);animation:pulse 1.5s infinite}
-.prog-out{width:160px;height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden}
-.prog-in{height:100%;background:var(--or);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
-.prog-lbl{font-size:11px;font-weight:700;color:#9ca3af;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
-.proj-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;min-height:calc(100vh - 56px);background:#fafafa}
-.step{display:none}
-.step.active{display:flex;flex-direction:column;align-items:center;width:100%;max-width:900px;animation:fu .4s both}
+/* THERMO */
+.thermo-grid{display:flex;flex-direction:column;gap:8px}
+.thermo-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.thermo-item.caotic{background:#FDECEC;color:var(--red)}
+.thermo-item.unstable{background:var(--amber-pale);color:var(--amber)}
+.thermo-item.improving{background:#FEFBE6;color:#907A00}
+.thermo-item.stable{background:var(--green-pale);color:var(--green)}
+.thermo-item.selected{border-color:currentColor;box-shadow:0 0 0 1px currentColor}
+.thermo-emoji{font-size:22px}
+.thermo-name{font-size:14px;font-weight:600}
+.thermo-desc{font-size:12px;opacity:.7}
 
-/* Live counter chip */
-.live-count{display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid var(--border);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:700;color:#374151;margin-bottom:28px}
-.lc-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite}
+/* DIAG STEPS */
+.diag-step{display:none}
+.diag-step.active{display:block}
 
-/* Intro step */
-.intro-card{text-align:center;max-width:640px}
-.intro-icon{font-size:64px;margin-bottom:22px;display:block}
-.intro-step-n{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--or);margin-bottom:14px}
-.intro-q{font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-1.2px;line-height:1.15;margin-bottom:16px}
-.intro-hint{font-size:15px;color:#6b7280;line-height:1.65;margin-bottom:32px}
+/* DIAG OUTPUT */
+.diag-hero{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-d) 100%);border-radius:var(--r-lg);padding:22px 20px;color:var(--white);margin-bottom:14px}
+.diag-hero-eyebrow{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.diag-hero-title{font-family:'DM Serif Display',serif;font-size:21px;line-height:1.3;margin-bottom:6px}
+.diag-hero-desc{font-size:13px;opacity:.85;line-height:1.4}
 
-/* Question step */
-.q-card{width:100%;max-width:860px}
-.q-step-n{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--or);margin-bottom:16px;text-align:center}
-.q-txt{font-size:30px;font-weight:900;color:#1a1a1a;letter-spacing:-.8px;line-height:1.2;text-align:center;margin-bottom:36px}
-.k-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;margin-bottom:28px}
-.k-btn{padding:22px 18px;border-radius:14px;border:none;font-size:16px;font-weight:800;font-family:inherit;cursor:default;text-align:left;display:flex;align-items:center;gap:12px;line-height:1.3}
-.k-btn.c0{background:#7f1d1d;color:#fca5a5}.k-btn.c1{background:#78350f;color:#fde68a}
-.k-btn.c2{background:#1e3a8a;color:#bfdbfe}.k-btn.c3{background:#14532d;color:#a7f3d0}
-.k-num{width:32px;height:32px;min-width:32px;border-radius:8px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
+/* PROBLEM CHIPS */
+.pchips{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{padding:9px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:var(--white);color:var(--slate);transition:all .2s;font-family:inherit}
+.pchip:hover{border-color:var(--orange);color:var(--orange)}
+.pchip.selected{border-color:var(--orange);background:var(--orange-pale);color:var(--orange)}
 
-/* Scale */
-.scale-q{font-size:30px;font-weight:900;color:#1a1a1a;letter-spacing:-.8px;text-align:center;margin-bottom:36px}
-.scale-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
-.scale-disp{width:96px;height:96px;border-radius:18px;border:2px solid var(--border);background:#f9fafb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-.scale-disp .se{font-size:34px}.scale-disp .sl{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em}
+/* INTERV CARDS */
+.interv-card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-xs);padding:20px;margin-bottom:12px;border-left:4px solid var(--border);transition:box-shadow .2s}
+.interv-card.r{border-left-color:var(--green)}
+.interv-card.m{border-left-color:var(--orange)}
+.interv-card.p{border-left-color:var(--slate)}
+.interv-card.applied-card{box-shadow:0 0 0 2px var(--green)}
+.interv-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.badge-r{background:var(--green-pale);color:var(--green)}
+.badge-m{background:var(--orange-pale);color:var(--orange)}
+.badge-p{background:var(--slate-pale);color:var(--slate)}
+.interv-title{font-size:15px;font-weight:600;color:var(--slate);margin-bottom:5px}
+.interv-obj{font-size:13px;color:var(--slate-mid);margin-bottom:12px}
+.steps-list{counter-reset:step;list-style:none}
+.steps-list li{font-size:13px;padding:6px 0 6px 22px;position:relative;border-bottom:1px solid var(--slate-pale);color:var(--slate)}
+.steps-list li:last-child{border-bottom:none}
+.steps-list li::before{content:counter(step);counter-increment:step;position:absolute;left:0;font-size:11px;font-weight:700;color:var(--orange);top:7px}
+.script-box{background:var(--slate-pale);border-radius:10px;padding:13px 15px;margin-top:12px;border-left:3px solid var(--orange)}
+.script-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);margin-bottom:5px}
+.script-text{font-size:13px;color:var(--slate);font-style:italic;line-height:1.5}
+.btn-apply{width:100%;margin-top:14px;padding:12px;background:var(--green);color:var(--white);border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+.btn-apply:hover{background:var(--green-d)}
+.btn-apply.applied{background:#2A5227;cursor:default}
 
-/* Socio */
-.socio-q{font-size:28px;font-weight:900;color:#1a1a1a;letter-spacing:-.8px;text-align:center;margin-bottom:10px}
-.socio-hint{font-size:15px;color:#6b7280;text-align:center;margin-bottom:28px}
-.socio-disp{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%}
-.socio-chip{background:#f5f5f5;border:1px solid var(--border);border-radius:100px;padding:8px 18px;font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:8px}
-.socio-chip-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff}
+/* CHECK-IN */
+.emoji-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.e-btn{padding:16px 8px;border-radius:12px;border:2px solid var(--border);background:var(--white);cursor:pointer;text-align:center;transition:all .2s;font-family:inherit}
+.e-btn .e-emoji{font-size:26px;display:block;margin-bottom:5px}
+.e-btn .e-label{font-size:12px;font-weight:500;color:var(--slate-mid)}
+.e-btn.selected{border-color:var(--orange);background:var(--orange-pale)}
+.e-btn.selected .e-label{color:var(--orange)}
+.obs-chips{display:flex;flex-wrap:wrap;gap:8px}
+.obs-chip{padding:8px 13px;border-radius:16px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;font-family:inherit;background:var(--white);color:var(--slate);transition:all .2s}
+.obs-chip.selected{border-color:var(--green);background:var(--green-pale);color:var(--green)}
+textarea.ta{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--slate);resize:vertical;min-height:90px;outline:none;transition:border-color .2s}
+textarea.ta:focus{border-color:var(--orange)}
 
-/* Text step (teacher read-only) */
-.t-q{font-size:28px;font-weight:900;color:#1a1a1a;letter-spacing:-.8px;text-align:center;margin-bottom:24px}
-.t-placeholder{font-size:16px;color:#9ca3af;text-align:center;font-style:italic;margin-bottom:28px}
+/* HISTORIAL */
+.hist-item{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-xs);padding:15px;margin-bottom:10px;display:flex;gap:13px;align-items:flex-start}
+.hi-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.hi-title{font-size:14px;font-weight:600;color:var(--slate)}
+.hi-meta{font-size:12px;color:var(--slate-light);margin-top:2px}
+.hi-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;margin-top:6px}
+.hi-pos{background:var(--green-pale);color:var(--green)}
+.hi-neu{background:var(--amber-pale);color:var(--amber)}
+.hi-neg{background:var(--red-pale);color:var(--red)}
+.hi-quote{font-size:12px;color:var(--slate-light);margin-top:5px;font-style:italic}
 
-/* Responses counter */
-.resp-counter{display:flex;align-items:center;gap:10px;background:#f9fafb;border:1px solid var(--border);border-radius:100px;padding:8px 20px;font-size:14px;font-weight:700;color:#6b7280;margin-bottom:16px}
-.rc-bar{flex:1;height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden;min-width:80px}
-.rc-fill{height:100%;background:#4ade80;border-radius:2px;transition:width .4s}
-.resp-count-n{color:#4ade80}
+/* ALERTS */
+.alert-strip{border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+.alert-info{background:#EEF5FF;color:#2D5FA8;border:1px solid #C0D8FF}
+.alert-success{background:var(--green-pale);color:var(--green);border:1px solid #B8D9B6}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;z-index:300;border-radius:var(--r);padding:14px 18px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);animation:fadeUp .3s ease both}
 
-/* Buttons */
-.btn-proj{padding:16px 40px;font-size:16px;border-radius:12px;letter-spacing:.02em}
+/* EMPTY */
+.empty{text-align:center;padding:50px 20px;color:var(--slate-light)}
+.empty .e-icon{font-size:48px;margin-bottom:12px}
+.empty .e-title{font-size:15px;font-weight:600;color:var(--slate-mid);margin-bottom:6px}
+.empty .e-sub{font-size:13px;line-height:1.5}
 
-/* Results aggregation after each question */
-.agg-bars{width:100%;max-width:700px;display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
-.agg-row{display:flex;align-items:center;gap:12px}
-.agg-label{font-size:13px;font-weight:700;color:#374151;width:160px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.agg-bar-wrap{flex:1;background:#f0f0f0;border-radius:8px;overflow:hidden;height:32px}
-.agg-bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:12px;font-size:12px;font-weight:800;color:#fff;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.agg-pct{font-size:13px;font-weight:800;color:#9ca3af;width:40px;flex-shrink:0}
+/* SUCCESS */
+#success-overlay{display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(145deg,var(--green) 0%,var(--green-d) 100%);flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;color:var(--white)}
+#success-overlay.show{display:flex}
+.suc-icon{font-size:68px;margin-bottom:20px;animation:bounceIn .5s ease both}
+.suc-title{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:10px}
+.suc-sub{font-size:15px;opacity:.85;margin-bottom:36px;line-height:1.5}
 
-/* Result */
-.res-wrap{width:100%;max-width:680px;text-align:center}
-.res-badge{display:inline-block;background:rgba(22,163,74,.2);color:#4ade80;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:6px 16px;border-radius:100px;margin-bottom:18px;border:1px solid rgba(22,163,74,.3)}
-.res-title{font-size:32px;font-weight:900;color:#1a1a1a;letter-spacing:-1px;margin-bottom:28px}
-.thermo-row{display:flex;gap:20px;justify-content:center;align-items:center;margin-bottom:28px;flex-wrap:wrap}
-.thermo-item{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;min-width:140px}
-.thermo-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:14px}
-.thermo-ring{width:96px;height:96px;position:relative;margin:0 auto 8px}
-.thermo-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.thermo-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
-.ring-bg{stroke:#e5e7eb}.ring-fill{stroke-dasharray:226;stroke-dashoffset:226;transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1) .4s}
-.ring-fill.br{stroke:var(--or)}.ring-fill.ar{stroke:#4ade80}
-.thermo-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
-.thermo-pct.b{color:var(--or)}.thermo-pct.a{color:#4ade80}
-.thermo-den{font-size:10px;color:#9ca3af;font-weight:700;margin-top:4px}
-.arr-big{font-size:32px;color:#d1d5db;align-self:center}
-.res-msg{display:flex;align-items:center;gap:10px;justify-content:center;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.25);border-radius:12px;padding:16px 24px;margin-bottom:28px}
-.res-msg-t{font-size:15px;font-weight:700;color:#4ade80}
-.res-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes bounceIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.fade-in{animation:fadeUp .3s ease both}
 
-/* ═══ STUDENT SCREEN ═══ */
-#s-student{flex-direction:column;background:#fff;align-items:center;justify-content:center;min-height:100vh}
-.stu-card{background:#fff;border:1px solid var(--border);border-radius:24px;padding:44px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 4px 32px rgba(0,0,0,.08)}
-.stu-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
-.stu-logo-icon{width:36px;height:36px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.stu-logo-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}.stu-logo-name em{color:var(--or);font-style:normal}
-.stu-title{font-size:22px;font-weight:900;color:#1a1a1a;margin-bottom:8px;letter-spacing:-.4px}
-.stu-sub{font-size:13px;color:#9ca3af;margin-bottom:32px}
-.stu-field{margin-bottom:14px}
-.stu-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:8px;text-align:left}
-.stu-field input{width:100%;padding:14px 16px;background:#f9fafb;border:1px solid rgba(0,0,0,.1);border-radius:var(--r-sm);color:#1a1a1a;font-size:18px;font-family:inherit;outline:none;text-align:center;font-weight:800;letter-spacing:4px;text-transform:uppercase;transition:border-color var(--tr)}
-.stu-field input::placeholder{color:#c4c4c4;letter-spacing:0;font-weight:400;font-size:14px}
-.stu-field input:focus{border-color:var(--or);background:#fff8f4}
-.stu-name-input{letter-spacing:0 !important;text-align:left !important;font-size:14px !important;font-weight:600 !important}
-.stu-error{font-size:12px;color:#f87171;margin-top:10px;font-weight:600;display:none}
-
-/* Student waiting room */
-.stu-waiting{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;text-align:center;width:100%}
-.stu-waiting.on{display:flex;animation:fu .4s both}
-.sw-icon{font-size:64px;margin-bottom:20px;animation:pulse 2s infinite}
-.sw-name{font-size:24px;font-weight:900;color:#1a1a1a;margin-bottom:8px}
-.sw-status{font-size:14px;color:#6b7280;margin-bottom:32px}
-.sw-dots{display:flex;gap:8px;justify-content:center}
-.sw-dot{width:8px;height:8px;border-radius:50%;background:var(--or);animation:pulse 1.4s infinite}
-.sw-dot:nth-child(2){animation-delay:.2s}.sw-dot:nth-child(3){animation-delay:.4s}
-.sw-code-badge{background:var(--or-pale);border:1px solid rgba(243,106,21,.3);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:700;color:var(--or);margin-bottom:20px}
-
-/* Student answering */
-.stu-answer{display:none;flex-direction:column;width:100%;min-height:100vh;background:#fff}
-.stu-answer.on{display:flex;animation:fu .35s both}
-.sa-top{padding:16px 20px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.sa-qnum{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em}
-.sa-name{font-size:12px;font-weight:700;color:rgba(255,106,0,.8)}
-.sa-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;gap:14px}
-.sa-q-txt{font-size:18px;font-weight:800;color:#1a1a1a;text-align:center;margin-bottom:10px;line-height:1.4}
-.sa-k-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:500px}
-.sa-k-btn{padding:22px 16px;border-radius:14px;border:none;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;gap:10px}
-.sa-k-btn:hover{transform:scale(1.05);box-shadow:0 6px 24px rgba(0,0,0,.3)}
-.sa-k-btn.c0{background:#7f1d1d;color:#fca5a5}.sa-k-btn.c1{background:#78350f;color:#fde68a}
-.sa-k-btn.c2{background:#1e3a8a;color:#bfdbfe}.sa-k-btn.c3{background:#14532d;color:#a7f3d0}
-.sa-k-btn.picked{transform:scale(.96);opacity:.7}
-.sa-scale-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:500px}
-.sa-scale-btn{width:72px;height:72px;border-radius:14px;border:2px solid var(--border);background:#f9fafb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
-.sa-scale-btn .se{font-size:26px}.sa-scale-btn .sl{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase}
-.sa-scale-btn:hover,.sa-scale-btn.picked{border-color:var(--or);background:var(--or-pale);transform:scale(1.1)}
-.sa-text-inp{width:100%;max-width:500px;padding:16px 18px;background:#f9fafb;border:2px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;color:#1a1a1a;outline:none;resize:none;transition:border-color var(--tr)}
-.sa-text-inp:focus{border-color:var(--or);background:#fff8f4}
-.sa-text-inp::placeholder{color:#c4c4c4}
-.sa-socio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;width:100%;max-width:500px}
-.sa-socio-card{background:#f9fafb;border:2px solid var(--border);border-radius:10px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .2s}
-.sa-socio-card:hover{border-color:rgba(243,106,21,.4);background:var(--or-pale)}
-.sa-socio-card.sel{border-color:var(--or);background:var(--or-pale)}
-.sa-socio-av{width:36px;height:36px;border-radius:50%;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
-.sa-socio-nm{font-size:11px;font-weight:700;color:#374151}
-.sa-send-btn{padding:14px 40px;font-size:15px;border-radius:12px;margin-top:8px}
-
-/* Student answered feedback */
-.stu-answered{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px 24px;text-align:center;min-height:100vh;background:#fff}
-.stu-answered.on{display:flex;animation:pop .4s both}
-.sa-big-icon{font-size:80px;margin-bottom:20px}
-.sa-fb-title{font-size:24px;font-weight:900;color:#1a1a1a;margin-bottom:8px}
-.sa-fb-sub{font-size:14px;color:#6b7280}
-
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:700px){
-  .l-card{padding:32px 22px}.gs-body{padding:36px 16px 60px}.gs-title{font-size:26px}
-  .groups-grid{grid-template-columns:1fr}.topbar,.proj-bar,.lobby-bar,.gs-bar{padding:0 16px}
-  .mc{padding:24px 14px 60px}.ind-grid{grid-template-columns:1fr 1fr}
-  .proj-wrap,.lobby-body{padding:24px 14px}.intro-q,.q-txt,.scale-q,.t-q,.socio-q{font-size:22px}
-  .k-grid{grid-template-columns:1fr}.k-btn{font-size:14px;padding:16px 14px}
-  .scale-disp{width:70px;height:70px}.scale-disp .se{font-size:26px}
-  .prog-out{width:80px}.res-title{font-size:24px}.tb-bc{display:none}
-  .thermo-ring{width:76px;height:76px}.thermo-pct{font-size:17px}
-  .lobby-join-card{padding:28px 24px;min-width:unset}.lj-code{font-size:48px;letter-spacing:8px}
-  .stu-card{padding:32px 22px}
-  .sa-k-grid{grid-template-columns:1fr}
-}
-@media(max-width:480px){.ind-grid{grid-template-columns:1fr}.intro-q{font-size:20px}.intro-icon{font-size:48px}}
+@media(max-width:480px){.login-card{padding:36px 22px}}
 </style>
 </head>
 <body>
 
-<!-- ═══ 1. TEACHER LOGIN ═══ -->
-<section id="s-login" class="screen active">
-  <div class="l-wrap">
-    <div class="l-logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946" style="height:44px;width:auto"><defs><style>.kl-txt{fill:#1a1a1a;}.kl-ic{fill:#f36a15;}</style></defs><path class="kl-txt" d="M243.96864,56.11857c4.45682-3.6448,7.9363-7.87949,11.48389-12.05451,3.68147-4.33251,7.40637-8.62808,11.09134-12.95762a3.83886,3.83886,0,0,1,3.11329-1.53893c2.93132.0303,5.86323-.008,8.79467.01481.65571.0051,1.51126-.21155,1.81716.59976.24707.65532-.41487,1.06576-.80933,1.49749q-6.277,6.86963-12.56253,13.73139c-2.49515,2.73874-4.85568,5.60961-7.47594,8.22131-1.55363,1.54859-1.52191,2.64427-.22862,4.345,6.20764,8.16353,12.29923,16.41533,18.41476,24.64865,1.49016,2.00623,2.91858,4.05839,4.36849,6.09437.91425,1.28378.771,2.05368-.99981,2.04888-3.44893-.00935-6.8987-.04716-10.34646.01652-1.54864.02855-2.28129-.91522-3.04919-2.00924-5.59562-7.97165-11.26785-15.89027-16.79175-23.9111-1.304-1.89343-1.87128-1.793-3.56175-.23032-2.76993,2.56057-3.46921,5.43948-3.3071,8.99671.21162,4.64485-.06069,9.31018.08177,13.96033.077,2.51421-.86977,3.41527-3.32163,3.21383a43.42526,43.42526,0,0,0-5.68731-.0084c-1.92429.09529-2.48083-.77082-2.5717-2.6089-.28956-5.85762-.08666-11.70346-.031-17.55961.11715-12.31967-.1538-24.64283-.23968-36.96475-.02856-4.09675.02894-4.17009,4.22574-4.11483,8.74193.11509,7.5052-1.23139,7.58169,7.474C244.01363,43.388,243.96864,49.75348,243.96864,56.11857Z"/><path class="kl-txt" d="M344.0094,71.68746c-.00025,3.0154-.02619,6.03111.00888,9.04612.02334,2.009.77646,3.64321,2.97867,3.87232,1.28182.13335,2.29212.25059,2.09431,1.81907-.21744,1.72365.92543,3.89851-1.674,4.869-4.27907,1.59766-10.0302-.07034-12.36147-3.92712-.90433-1.49612-1.35174-1.13994-2.41628-.299-5.77748,4.56383-12.22486,6.36256-19.34731,3.83692-4.1762-1.48092-6.91207-4.4181-7.22956-9.14637-.34473-5.13326,1.38141-9.11923,6.15168-11.4903,4.92167-2.44629,10.2131-2.94056,15.59845-2.92571a4.91352,4.91352,0,0,0,1.03195-.00886c1.48368-.32175,3.68983,1.00308,4.13658-1.72826a5.32486,5.32486,0,0,0-3.21965-6.10439c-3.63795-1.3179-7.31885-.83518-10.96337-.0409a18.02521,18.02521,0,0,0-4.66257,1.49458c-2.39168,1.28019-3.22148.411-3.91807-1.90472-1.22284-4.06507-1.33456-3.9722,2.6232-5.47011a33.8893,33.8893,0,0,1,21.79541-1.28032c6.9205,1.98379,9.37221,5.5293,9.37335,12.66781Q344.01011,68.32735,344.0094,71.68746Zm-15.88357,1.3956a19.45034,19.45034,0,0,0-7.84072,1.30549,5.43115,5.43115,0,0,0-1.83587,8.6117c3.20723,3.32839,12.88193,1.13852,14.39805-3.259C334.36551,75.33767,332.8235,73.04179,328.12583,73.08306Z"/><path class="kl-txt" d="M456.26215,71.48017c.00088-5.51381.03716-11.028-.01889-16.54123-.0194-1.90413.56484-2.94488,2.66721-2.78357a12.35922,12.35922,0,0,0,3.0878-.19249c2.66254-.47649,4.34621.2418,4.59025,3.23378.16422,2.014.98145,1.91388,2.43739.77863a21.62233,21.62233,0,0,1,15.40892-4.7833c6.87542.51238,11.6589,5.15422,11.73479,12.001.09156,8.26976-.02787,16.54185.0568,24.81175.02218,2.1663-.81672,2.79012-2.89526,2.81049-8.27885.08121-8.27752.13667-8.2748-8.00778q.00255-7.484-.00095-14.96792c-.008-6.38857-3.54352-9.17007-9.72139-7.608a19.61993,19.61993,0,0,0-5.76588,2.83988A3.89268,3.89268,0,0,0,467.679,66.735c.06288,6.97782-.0489,13.95766.05675,20.93441.03557,2.35259-.76706,3.3131-3.14126,3.12126a28.52568,28.52568,0,0,0-5.16533.02005c-2.59752.26493-3.25664-.93158-3.20457-3.30681C456.34164,82.165,456.26133,76.82169,456.26215,71.48017Z"/><path class="kl-txt" d="M435.01373,74.19527c-3.62193,0-7.24646.08365-10.8648-.02974-2.37249-.07435-2.80521,1.04814-2.39739,3.05611.82493,4.06119,4.366,6.80763,9.316,7.16659a25.70656,25.70656,0,0,0,12.40611-1.90062c1.87678-.82618,2.57831-.2125,3.0818,1.59324,1.21544,4.35907,1.19819,4.60164-3.14208,6.10435a32.09474,32.09474,0,0,1-17.31989,1.338c-12.61754-2.65482-18.00232-11.43078-16.1397-24.06341,1.427-9.67827,9.0569-15.96615,18.84477-16.2928,5.68278-.18964,10.9695.60985,15.34579,4.73809,4.94929,4.66877,5.28141,10.572,4.78379,16.73716-.12517,1.55015-1.38289,1.53348-2.53122,1.53523q-5.69157.00871-11.38315.00218Zm-4.84963-6.37913c2.15348,0,4.309-.05829,6.45976.01972,1.52955.05547,2.12732-.43238,2.07728-2.07189-.14319-4.68751-3.06051-7.564-7.94907-7.62394-4.6226-.05667-9.08482,3.88327-9.22877,8.03137-.04587,1.32239.52087,1.65813,1.66358,1.64736C425.51243,67.79684,427.83836,67.81221,430.1641,67.81614Z"/><path class="kl-txt" d="M389.97992,90.77507c-4.398.00218-8.79681.04583-13.19369-.02631-1.20824-.01983-2.86339.66-3.50634-.82713a5.15828,5.15828,0,0,1,.57629-5.17533q3.47226-4.82752,7.04347-9.5838c3.20059-4.27752,6.44232-8.52436,9.65062-12.79624.39525-.52632,1.13778-1.03055.78721-1.77411-.35645-.75606-1.22113-.47626-1.87154-.48134-4.31152-.03367-8.62481-.09581-12.93471-.01093-2.27639.04482-3.27184-.72846-3.20113-3.14518.14179-4.84527-.38732-4.9657,4.83409-4.91132,7.74781.08071,15.50036-.28658,23.25789.10413,4.1035.20667,5.61625,2.57582,3.60734,6.3052a42.72253,42.72253,0,0,1-3.27161,4.64376q-6.38368,8.78648-12.76945,17.57138c-.38545.5326-1.1235,1.07491-.78936,1.784.34773.73784,1.2308.43052,1.87925.43437,4.65659.02755,9.31508.0933,13.96928-.01512,2.302-.05363,3.44393.70151,3.12306,3.11945a10.55837,10.55837,0,0,0-.00834,1.29208c-.02749,3.42033-.06762,3.47541-3.47079,3.48653C399.121,90.78411,394.55046,90.77289,389.97992,90.77507Z"/><path class="kl-txt" d="M298.91812,60.10886q0,13.304-.00067,26.608c-.001,4.05391-.00432,4.05511-4.18065,4.06168-1.6366.00255-3.27512-.05086-4.90926.01187-1.49963.05748-2.27951-.55083-2.2767-2.0785.00016-.086-.01071-.172-.01071-.258q-.00711-28.15782-.0255-56.31562c-.0024-1.87162.83527-2.64313,2.674-2.58534,1.97915.0622,3.967.101,5.94158-.014,2.1889-.12754,2.8171.87363,2.80206,2.92876-.06726,9.21329-.02922,18.42738-.02922,27.64117Z"/><path class="kl-txt" d="M354.24247,71.23568c0-5.50875.05112-11.01823-.02705-16.52586-.02837-2.0003.62-2.79322,2.71457-2.58494a44.70481,44.70481,0,0,0,6.194.05085c1.77659-.07125,2.50046.67909,2.4815,2.4225q-.18378,16.89261-.2962,33.78591c-.0097,1.80467-.79125,2.46114-2.50725,2.39529-1.63341-.06272-3.2713-.00221-4.90723-.00493-3.652-.00606-3.66244-.00833-3.66965-3.78733q-.015-7.87577-.00253-15.75149Z"/><path class="kl-txt" d="M366.83757,35.3833a6.90085,6.90085,0,0,1-6.96274,7.09787c-4.2955-.00509-7.29083-2.9121-7.24928-7.03554a6.878,6.878,0,0,1,7.11848-6.94109A6.73906,6.73906,0,0,1,366.83757,35.3833Z"/><path class="kl-ic" d="M90.92.00742q39.16863,0,78.33724.00368a11.98473,11.98473,0,0,1,6.92047,1.71822c3.62,2.44183,4.36587,6.151,4.062,10.13424-.32873,4.30958-.67578,4.43013-5.02242,4.65618a109.44091,109.44091,0,0,0-24.49466,4.50792c-17.88412,5.1294-33.85806,13.9488-48.66269,25.06624C92.37509,53.36667,83.065,61.10916,73.587,68.641c-5.1468,4.09-10.9349,7.1089-16.70337,10.154a134.28566,134.28566,0,0,1-37.60958,13.63A106.393,106.393,0,0,1,1.81531,94.32169C.4815,94.35279-.0021,93.94174,0,92.55633q.06162-40.44565.063-80.8914C.07353,4.33067,4.56065.034,12.157.01649,25.497-.0143,38.83706.0075,52.1771.0074Q71.54854.00726,90.92.00742Z"/><path class="kl-ic" d="M2.87437,125.065a4.05486,4.05486,0,0,1,2.9859-.73415A112.80511,112.80511,0,0,0,37.118,120.26823,103.31068,103.31068,0,0,0,73.67288,101.058c9.72479-7.73949,18.2855-16.70212,26.85119-25.65951,5.65477-5.91335,11.28711-11.8518,17.22232-17.48787,11.79233-11.19795,24.58425-21.00626,39.30593-28.11474a86.36539,86.36539,0,0,1,19.75036-6.97466c.50865-.10716,1.01991-.2151,1.53552-.27322a1.44748,1.44748,0,0,1,1.82,1.32391,14.09416,14.09416,0,0,1,.1576,1.974q.01134,43.56774-.00587,87.13547a13.97924,13.97924,0,0,1-1.97066,7.73255,10.58372,10.58372,0,0,1-8.83951,5.10859c-7.41881.3694-14.83863-.03039-22.25834-.0215q-70.38964.08426-140.77948.02616C5.25284,125.82711,4.00874,125.95327,2.87437,125.065Z"/></svg>
+<!-- ════════ LOGIN ════════ -->
+<div id="s-login" class="screen active">
+  <div class="login-card">
+    <div class="logo-center">
+      <!-- Real Klaizen SVG logo -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946">
+        <defs><style>.kl1{fill:#464646}.kl2{fill:#f36a15}</style></defs>
+        <path class="kl1" d="M243.97,56.12c4.46-3.64,7.94-7.88,11.48-12.05,3.68-4.33,7.41-8.63,11.09-12.96a3.84,3.84,0,0,1,3.11-1.54c2.93,0,5.86-.01,8.79.01.66,0,1.51-.21,1.82.6.25.66-.41,1.07-.81,1.5q-6.28,6.87-12.56,13.73c-2.5,2.74-4.86,5.61-7.48,8.22-1.55,1.55-1.52,2.64-.23,4.35,6.21,8.16,12.3,16.42,18.41,24.65,1.49,2.01,2.92,4.06,4.37,6.09.91,1.28.77,2.05-1,2.05-3.45-.01-6.9-.05-10.35.02-1.55.03-2.28-.92-3.05-2.01-5.6-7.97-11.27-15.89-16.79-23.91-1.3-1.89-1.87-1.79-3.56-.23-2.77,2.56-3.47,5.44-3.31,9,.21,4.64-.06,9.31.08,13.96.08,2.51-.87,3.42-3.32,3.21a43.43,43.43,0,0,0-5.69-.01c-1.92.1-2.48-.77-2.57-2.61-.29-5.86-.09-11.7-.03-17.56.12-12.32-.15-24.64-.24-36.96-.03-4.1.03-4.17,4.23-4.11,8.74.12,7.51-1.23,7.58,7.47C244.01,43.39,243.97,49.75,243.97,56.12Z"/>
+        <path class="kl1" d="M344.01,71.69c0,3.02-.03,6.03.01,9.05.02,2.01.78,3.64,2.98,3.87,1.28.13,2.29.25,2.09,1.82-.22,1.72.93,3.9-1.67,4.87-4.28,1.6-10.03-.07-12.36-3.93-.9-1.5-1.35-1.14-2.42-.3-5.78,4.56-12.22,6.36-19.35,3.84-4.18-1.48-6.91-4.42-7.23-9.15-.34-5.13,1.38-9.12,6.15-11.49,4.92-2.45,10.21-2.94,15.6-2.93a4.91,4.91,0,0,0,1.03-.01c1.48-.32,3.69,1,4.14-1.73a5.32,5.32,0,0,0-3.22-6.1c-3.64-1.32-7.32-.84-10.96-.04a18,18,0,0,0-4.66,1.49c-2.39,1.28-3.22.41-3.92-1.9-1.22-4.07-1.33-3.97,2.62-5.47a33.89,33.89,0,0,1,21.8-1.28c6.92,1.98,9.37,5.53,9.37,12.67Q344.01,68.33,344.01,71.69Zm-15.88,1.4a19.45,19.45,0,0,0-7.84,1.31,5.43,5.43,0,0,0-1.84,8.61c3.21,3.33,12.88,1.14,14.4-3.26C334.37,75.34,332.82,73.04,328.13,73.08Z"/>
+        <path class="kl1" d="M456.26,71.48c0-5.51.04-11.03-.02-16.54-.02-1.9.56-2.94,2.67-2.78a12.36,12.36,0,0,0,3.09-.19c2.66-.48,4.35.24,4.59,3.23.16,2.01.98,1.91,2.44.78a21.62,21.62,0,0,1,15.41-4.78c6.88.51,11.66,5.15,11.73,12,.09,8.27-.03,16.54.06,24.81.02,2.17-.82,2.79-2.9,2.81-8.28.08-8.28.14-8.27-8.01q0-7.48,0-14.97c-.01-6.39-3.54-9.17-9.72-7.61a19.62,19.62,0,0,0-5.77,2.84,3.89,3.89,0,0,0-1.96,3.69c.06,6.98-.05,13.96.06,20.93.04,2.35-.77,3.31-3.14,3.12a28.53,28.53,0,0,0-5.17.02c-2.6.26-3.26-.93-3.2-3.31C456.34,82.17,456.26,76.82,456.26,71.48Z"/>
+        <path class="kl1" d="M435.01,74.2c-3.62,0-7.25.08-10.86-.03-2.37-.07-2.81,1.05-2.4,3.06.82,4.06,4.37,6.81,9.32,7.17a25.71,25.71,0,0,0,12.41-1.9c1.88-.83,2.58-.21,3.08,1.59,1.22,4.36,1.2,4.6-3.14,6.1a32.09,32.09,0,0,1-17.32,1.34c-12.62-2.65-18-11.43-16.14-24.06,1.43-9.68,9.06-15.97,18.84-16.29,5.68-.19,10.97.61,15.35,4.74,4.95,4.67,5.28,10.57,4.78,16.74-.13,1.55-1.38,1.53-2.53,1.54Q437.69,74.2,435.01,74.2Zm-4.85-6.38c2.15,0,4.31-.06,6.46.02,1.53.06,2.13-.43,2.08-2.07-.14-4.69-3.06-7.56-7.95-7.62-4.62-.06-9.08,3.88-9.23,8.03-.05,1.32.52,1.66,1.66,1.65C425.51,67.8,427.84,67.81,430.16,67.82Z"/>
+        <path class="kl1" d="M390,90.78c-4.4,0-8.8.05-13.19-.03-1.21-.02-2.86.66-3.51-.83a5.16,5.16,0,0,1,.58-5.18q3.47-4.83,7.04-9.58c3.2-4.28,6.44-8.52,9.65-12.8.4-.53,1.14-1.03.79-1.77-.36-.76-1.22-.48-1.87-.48-4.31-.03-8.62-.1-12.93-.01-2.28.04-3.27-.73-3.2-3.15.14-4.85-.39-4.97,4.83-4.91,7.75.08,15.5-.29,23.26.1,4.1.21,5.62,2.58,3.61,6.31a42.72,42.72,0,0,1-3.27,4.64q-6.38,8.79-12.77,17.57c-.39.53-1.12,1.07-.79,1.78.35.74,1.23.43,1.88.43,4.66.03,9.32.09,13.97-.02,2.3-.05,3.44.7,3.12,3.12a10.56,10.56,0,0,0-.01,1.29c-.03,3.42-.07,3.48-3.47,3.49C399.12,90.78,394.55,90.77,390,90.78Z"/>
+        <path class="kl1" d="M298.92,60.11q0,13.3,0,26.61c0,4.05,0,4.05-4.18,4.06-1.64,0-3.28-.05-4.91.01-1.5.06-2.28-.55-2.28-2.08v-.26q0-28.16-.03-56.32c0-1.87.84-2.64,2.67-2.59,1.98.06,3.97.1,5.94-.01,2.19-.13,2.82.87,2.8,2.93-.07,9.21-.03,18.43-.03,27.64Z"/>
+        <path class="kl1" d="M354.24,71.24c0-5.51.05-11.02-.03-16.53-.03-2,0.62-2.79,2.71-2.58a44.7,44.7,0,0,0,6.19.05c1.78-.07,2.5.68,2.48,2.42q-.18,16.89-.3,33.79c-.01,1.8-.79,2.46-2.51,2.4-1.63-.06-3.27,0-4.91,0-3.65,0-3.66,0-3.67-3.79q-.01-7.88,0-15.75Z"/>
+        <path class="kl1" d="M366.84,35.38a6.9,6.9,0,0,1-6.96,7.1c-4.3-.01-7.29-2.91-7.25-7.04a6.88,6.88,0,0,1,7.12-6.94A6.74,6.74,0,0,1,366.84,35.38Z"/>
+        <path class="kl2" d="M90.92,0q39.17,0,78.34.004a12,12,0,0,1,6.92,1.72c3.62,2.44,4.37,6.15,4.06,10.13-.33,4.31-.68,4.43-5.02,4.66a109.44,109.44,0,0,0-24.49,4.51c-17.88,5.13-33.86,13.95-48.66,25.07C92.38,53.37,83.07,61.11,73.59,68.64c-5.15,4.09-10.93,7.11-16.7,10.15a134.29,134.29,0,0,1-37.61,13.63A106.39,106.39,0,0,1,1.82,94.32C.48,94.35,0,93.94,0,92.56q.06-40.45.06-80.89C.07,4.33,4.56.03,12.16.02,25.5-.01,38.84.01,52.18.01Q71.55,0,90.92,0Z"/>
+        <path class="kl2" d="M2.87,125.07a4.05,4.05,0,0,1,2.99-.73A112.81,112.81,0,0,0,37.12,120.27,103.31,103.31,0,0,0,73.67,101.06c9.72-7.74,18.29-16.7,26.85-25.66,5.65-5.91,11.29-11.85,17.22-17.49,11.79-11.2,24.58-21.01,39.31-28.11a86.37,86.37,0,0,1,19.75-6.97c.51-.11,1.02-.22,1.54-.27a1.45,1.45,0,0,1,1.82,1.32,14.09,14.09,0,0,1,.16,1.97q.01,43.57-.01,87.14a13.98,13.98,0,0,1-1.97,7.73,10.58,10.58,0,0,1-8.84,5.11c-7.42.37-14.84-.03-22.26-.02q-70.39.08-140.78.03C5.25,125.83,4.01,125.95,2.87,125.07Z"/>
+      </svg>
     </div>
-    <div class="l-card">
-      <div class="l-title">Acceso docente</div>
-      <div class="l-sub">Entra en tu panel de profesor</div>
-      <div class="field"><label>Email</label><input type="email" placeholder="tu@email.com" id="login-email"/></div>
-      <div class="field"><label>Contraseña</label><input type="password" placeholder="••••••••" id="login-pass"/></div>
-      <button class="btn btn-or" style="width:100%;padding:16px;font-size:15px;margin-top:8px;border-radius:var(--r-sm)" onclick="teacherLogin()">Acceder al panel →</button>
-      <div class="l-hint">Demo: usa cualquier email y contraseña</div>
+    <p class="login-label">Bienvenido/a de nuevo</p>
+    <p class="login-sublabel">Tu herramienta de clima de aula</p>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="tu@centro.es" value="demo@klaizen.eu">
     </div>
-    <div class="l-student-link">
-      ¿Eres alumno? <a onclick="showScreen('s-student');resetStudentScreen()">Entra con tu código aquí →</a>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" value="klaizen2025">
     </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar <span>→</span></button>
+    <p class="login-note">Demo: cualquier correo y contraseña funcionan</p>
   </div>
-</section>
+</div>
 
-<!-- ═══ 2. GROUP SELECTOR ═══ -->
-<section id="s-groups" class="screen">
-  <header class="gs-bar">
-    <div class="logo-s"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946" style="height:28px;width:auto"><defs><style>.kl2-txt{fill:#1a1a1a;}.kl2-ic{fill:#f36a15;}</style></defs><path class="kl2-txt" d="M243.96864,56.11857c4.45682-3.6448,7.9363-7.87949,11.48389-12.05451,3.68147-4.33251,7.40637-8.62808,11.09134-12.95762a3.83886,3.83886,0,0,1,3.11329-1.53893c2.93132.0303,5.86323-.008,8.79467.01481.65571.0051,1.51126-.21155,1.81716.59976.24707.65532-.41487,1.06576-.80933,1.49749q-6.277,6.86963-12.56253,13.73139c-2.49515,2.73874-4.85568,5.60961-7.47594,8.22131-1.55363,1.54859-1.52191,2.64427-.22862,4.345,6.20764,8.16353,12.29923,16.41533,18.41476,24.64865,1.49016,2.00623,2.91858,4.05839,4.36849,6.09437.91425,1.28378.771,2.05368-.99981,2.04888-3.44893-.00935-6.8987-.04716-10.34646.01652-1.54864.02855-2.28129-.91522-3.04919-2.00924-5.59562-7.97165-11.26785-15.89027-16.79175-23.9111-1.304-1.89343-1.87128-1.793-3.56175-.23032-2.76993,2.56057-3.46921,5.43948-3.3071,8.99671.21162,4.64485-.06069,9.31018.08177,13.96033.077,2.51421-.86977,3.41527-3.32163,3.21383a43.42526,43.42526,0,0,0-5.68731-.0084c-1.92429.09529-2.48083-.77082-2.5717-2.6089-.28956-5.85762-.08666-11.70346-.031-17.55961.11715-12.31967-.1538-24.64283-.23968-36.96475-.02856-4.09675.02894-4.17009,4.22574-4.11483,8.74193.11509,7.5052-1.23139,7.58169,7.474C244.01363,43.388,243.96864,49.75348,243.96864,56.11857Z"/><path class="kl2-txt" d="M344.0094,71.68746c-.00025,3.0154-.02619,6.03111.00888,9.04612.02334,2.009.77646,3.64321,2.97867,3.87232,1.28182.13335,2.29212.25059,2.09431,1.81907-.21744,1.72365.92543,3.89851-1.674,4.869-4.27907,1.59766-10.0302-.07034-12.36147-3.92712-.90433-1.49612-1.35174-1.13994-2.41628-.299-5.77748,4.56383-12.22486,6.36256-19.34731,3.83692-4.1762-1.48092-6.91207-4.4181-7.22956-9.14637-.34473-5.13326,1.38141-9.11923,6.15168-11.4903,4.92167-2.44629,10.2131-2.94056,15.59845-2.92571a4.91352,4.91352,0,0,0,1.03195-.00886c1.48368-.32175,3.68983,1.00308,4.13658-1.72826a5.32486,5.32486,0,0,0-3.21965-6.10439c-3.63795-1.3179-7.31885-.83518-10.96337-.0409a18.02521,18.02521,0,0,0-4.66257,1.49458c-2.39168,1.28019-3.22148.411-3.91807-1.90472-1.22284-4.06507-1.33456-3.9722,2.6232-5.47011a33.8893,33.8893,0,0,1,21.79541-1.28032c6.9205,1.98379,9.37221,5.5293,9.37335,12.66781Q344.01011,68.32735,344.0094,71.68746Zm-15.88357,1.3956a19.45034,19.45034,0,0,0-7.84072,1.30549,5.43115,5.43115,0,0,0-1.83587,8.6117c3.20723,3.32839,12.88193,1.13852,14.39805-3.259C334.36551,75.33767,332.8235,73.04179,328.12583,73.08306Z"/><path class="kl2-txt" d="M456.26215,71.48017c.00088-5.51381.03716-11.028-.01889-16.54123-.0194-1.90413.56484-2.94488,2.66721-2.78357a12.35922,12.35922,0,0,0,3.0878-.19249c2.66254-.47649,4.34621.2418,4.59025,3.23378.16422,2.014.98145,1.91388,2.43739.77863a21.62233,21.62233,0,0,1,15.40892-4.7833c6.87542.51238,11.6589,5.15422,11.73479,12.001.09156,8.26976-.02787,16.54185.0568,24.81175.02218,2.1663-.81672,2.79012-2.89526,2.81049-8.27885.08121-8.27752.13667-8.2748-8.00778q.00255-7.484-.00095-14.96792c-.008-6.38857-3.54352-9.17007-9.72139-7.608a19.61993,19.61993,0,0,0-5.76588,2.83988A3.89268,3.89268,0,0,0,467.679,66.735c.06288,6.97782-.0489,13.95766.05675,20.93441.03557,2.35259-.76706,3.3131-3.14126,3.12126a28.52568,28.52568,0,0,0-5.16533.02005c-2.59752.26493-3.25664-.93158-3.20457-3.30681C456.34164,82.165,456.26133,76.82169,456.26215,71.48017Z"/><path class="kl2-txt" d="M435.01373,74.19527c-3.62193,0-7.24646.08365-10.8648-.02974-2.37249-.07435-2.80521,1.04814-2.39739,3.05611.82493,4.06119,4.366,6.80763,9.316,7.16659a25.70656,25.70656,0,0,0,12.40611-1.90062c1.87678-.82618,2.57831-.2125,3.0818,1.59324,1.21544,4.35907,1.19819,4.60164-3.14208,6.10435a32.09474,32.09474,0,0,1-17.31989,1.338c-12.61754-2.65482-18.00232-11.43078-16.1397-24.06341,1.427-9.67827,9.0569-15.96615,18.84477-16.2928,5.68278-.18964,10.9695.60985,15.34579,4.73809,4.94929,4.66877,5.28141,10.572,4.78379,16.73716-.12517,1.55015-1.38289,1.53348-2.53122,1.53523q-5.69157.00871-11.38315.00218Zm-4.84963-6.37913c2.15348,0,4.309-.05829,6.45976.01972,1.52955.05547,2.12732-.43238,2.07728-2.07189-.14319-4.68751-3.06051-7.564-7.94907-7.62394-4.6226-.05667-9.08482,3.88327-9.22877,8.03137-.04587,1.32239.52087,1.65813,1.66358,1.64736C425.51243,67.79684,427.83836,67.81221,430.1641,67.81614Z"/><path class="kl2-txt" d="M389.97992,90.77507c-4.398.00218-8.79681.04583-13.19369-.02631-1.20824-.01983-2.86339.66-3.50634-.82713a5.15828,5.15828,0,0,1,.57629-5.17533q3.47226-4.82752,7.04347-9.5838c3.20059-4.27752,6.44232-8.52436,9.65062-12.79624.39525-.52632,1.13778-1.03055.78721-1.77411-.35645-.75606-1.22113-.47626-1.87154-.48134-4.31152-.03367-8.62481-.09581-12.93471-.01093-2.27639.04482-3.27184-.72846-3.20113-3.14518.14179-4.84527-.38732-4.9657,4.83409-4.91132,7.74781.08071,15.50036-.28658,23.25789.10413,4.1035.20667,5.61625,2.57582,3.60734,6.3052a42.72253,42.72253,0,0,1-3.27161,4.64376q-6.38368,8.78648-12.76945,17.57138c-.38545.5326-1.1235,1.07491-.78936,1.784.34773.73784,1.2308.43052,1.87925.43437,4.65659.02755,9.31508.0933,13.96928-.01512,2.302-.05363,3.44393.70151,3.12306,3.11945a10.55837,10.55837,0,0,0-.00834,1.29208c-.02749,3.42033-.06762,3.47541-3.47079,3.48653C399.121,90.78411,394.55046,90.77289,389.97992,90.77507Z"/><path class="kl2-txt" d="M298.91812,60.10886q0,13.304-.00067,26.608c-.001,4.05391-.00432,4.05511-4.18065,4.06168-1.6366.00255-3.27512-.05086-4.90926.01187-1.49963.05748-2.27951-.55083-2.2767-2.0785.00016-.086-.01071-.172-.01071-.258q-.00711-28.15782-.0255-56.31562c-.0024-1.87162.83527-2.64313,2.674-2.58534,1.97915.0622,3.967.101,5.94158-.014,2.1889-.12754,2.8171.87363,2.80206,2.92876-.06726,9.21329-.02922,18.42738-.02922,27.64117Z"/><path class="kl2-txt" d="M354.24247,71.23568c0-5.50875.05112-11.01823-.02705-16.52586-.02837-2.0003.62-2.79322,2.71457-2.58494a44.70481,44.70481,0,0,0,6.194.05085c1.77659-.07125,2.50046.67909,2.4815,2.4225q-.18378,16.89261-.2962,33.78591c-.0097,1.80467-.79125,2.46114-2.50725,2.39529-1.63341-.06272-3.2713-.00221-4.90723-.00493-3.652-.00606-3.66244-.00833-3.66965-3.78733q-.015-7.87577-.00253-15.75149Z"/><path class="kl2-txt" d="M366.83757,35.3833a6.90085,6.90085,0,0,1-6.96274,7.09787c-4.2955-.00509-7.29083-2.9121-7.24928-7.03554a6.878,6.878,0,0,1,7.11848-6.94109A6.73906,6.73906,0,0,1,366.83757,35.3833Z"/><path class="kl2-ic" d="M90.92.00742q39.16863,0,78.33724.00368a11.98473,11.98473,0,0,1,6.92047,1.71822c3.62,2.44183,4.36587,6.151,4.062,10.13424-.32873,4.30958-.67578,4.43013-5.02242,4.65618a109.44091,109.44091,0,0,0-24.49466,4.50792c-17.88412,5.1294-33.85806,13.9488-48.66269,25.06624C92.37509,53.36667,83.065,61.10916,73.587,68.641c-5.1468,4.09-10.9349,7.1089-16.70337,10.154a134.28566,134.28566,0,0,1-37.60958,13.63A106.393,106.393,0,0,1,1.81531,94.32169C.4815,94.35279-.0021,93.94174,0,92.55633q.06162-40.44565.063-80.8914C.07353,4.33067,4.56065.034,12.157.01649,25.497-.0143,38.83706.0075,52.1771.0074Q71.54854.00726,90.92.00742Z"/><path class="kl2-ic" d="M2.87437,125.065a4.05486,4.05486,0,0,1,2.9859-.73415A112.80511,112.80511,0,0,0,37.118,120.26823,103.31068,103.31068,0,0,0,73.67288,101.058c9.72479-7.73949,18.2855-16.70212,26.85119-25.65951,5.65477-5.91335,11.28711-11.8518,17.22232-17.48787,11.79233-11.19795,24.58425-21.00626,39.30593-28.11474a86.36539,86.36539,0,0,1,19.75036-6.97466c.50865-.10716,1.01991-.2151,1.53552-.27322a1.44748,1.44748,0,0,1,1.82,1.32391,14.09416,14.09416,0,0,1,.1576,1.974q.01134,43.56774-.00587,87.13547a13.97924,13.97924,0,0,1-1.97066,7.73255,10.58372,10.58372,0,0,1-8.83951,5.10859c-7.41881.3694-14.83863-.03039-22.25834-.0215q-70.38964.08426-140.77948.02616C5.25284,125.82711,4.00874,125.95327,2.87437,125.065Z"/></svg></div>
-    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;color:rgba(255,255,255,.4)">Lucía Martínez</span><div class="gs-av">LM</div></div>
-  </header>
-  <div class="gs-body">
-    <div class="gs-hey">Buenos días, Lucía 👋</div>
-    <div class="gs-title">¿Con qué grupo trabajas hoy?</div>
-    <div class="gs-sub">Selecciona un grupo para ver su panel y lanzar actividades</div>
-    <div class="groups-grid" id="groups-grid"></div>
-  </div>
-</section>
+<!-- ════════ APP ════════ -->
+<div id="s-app" class="screen">
 
-<!-- ═══ 3. DASHBOARD ═══ -->
-<section id="s-main" class="screen">
-  <header class="topbar">
-    <div class="tb-l">
-      <div class="tb-icon" style="background:none;padding:0;width:auto"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946" style="height:30px;width:auto"><defs><style>.kl3-txt{fill:#464646;}.kl3-ic{fill:#f36a15;}</style></defs><path class="kl3-txt" d="M243.96864,56.11857c4.45682-3.6448,7.9363-7.87949,11.48389-12.05451,3.68147-4.33251,7.40637-8.62808,11.09134-12.95762a3.83886,3.83886,0,0,1,3.11329-1.53893c2.93132.0303,5.86323-.008,8.79467.01481.65571.0051,1.51126-.21155,1.81716.59976.24707.65532-.41487,1.06576-.80933,1.49749q-6.277,6.86963-12.56253,13.73139c-2.49515,2.73874-4.85568,5.60961-7.47594,8.22131-1.55363,1.54859-1.52191,2.64427-.22862,4.345,6.20764,8.16353,12.29923,16.41533,18.41476,24.64865,1.49016,2.00623,2.91858,4.05839,4.36849,6.09437.91425,1.28378.771,2.05368-.99981,2.04888-3.44893-.00935-6.8987-.04716-10.34646.01652-1.54864.02855-2.28129-.91522-3.04919-2.00924-5.59562-7.97165-11.26785-15.89027-16.79175-23.9111-1.304-1.89343-1.87128-1.793-3.56175-.23032-2.76993,2.56057-3.46921,5.43948-3.3071,8.99671.21162,4.64485-.06069,9.31018.08177,13.96033.077,2.51421-.86977,3.41527-3.32163,3.21383a43.42526,43.42526,0,0,0-5.68731-.0084c-1.92429.09529-2.48083-.77082-2.5717-2.6089-.28956-5.85762-.08666-11.70346-.031-17.55961.11715-12.31967-.1538-24.64283-.23968-36.96475-.02856-4.09675.02894-4.17009,4.22574-4.11483,8.74193.11509,7.5052-1.23139,7.58169,7.474C244.01363,43.388,243.96864,49.75348,243.96864,56.11857Z"/><path class="kl3-txt" d="M344.0094,71.68746c-.00025,3.0154-.02619,6.03111.00888,9.04612.02334,2.009.77646,3.64321,2.97867,3.87232,1.28182.13335,2.29212.25059,2.09431,1.81907-.21744,1.72365.92543,3.89851-1.674,4.869-4.27907,1.59766-10.0302-.07034-12.36147-3.92712-.90433-1.49612-1.35174-1.13994-2.41628-.299-5.77748,4.56383-12.22486,6.36256-19.34731,3.83692-4.1762-1.48092-6.91207-4.4181-7.22956-9.14637-.34473-5.13326,1.38141-9.11923,6.15168-11.4903,4.92167-2.44629,10.2131-2.94056,15.59845-2.92571a4.91352,4.91352,0,0,0,1.03195-.00886c1.48368-.32175,3.68983,1.00308,4.13658-1.72826a5.32486,5.32486,0,0,0-3.21965-6.10439c-3.63795-1.3179-7.31885-.83518-10.96337-.0409a18.02521,18.02521,0,0,0-4.66257,1.49458c-2.39168,1.28019-3.22148.411-3.91807-1.90472-1.22284-4.06507-1.33456-3.9722,2.6232-5.47011a33.8893,33.8893,0,0,1,21.79541-1.28032c6.9205,1.98379,9.37221,5.5293,9.37335,12.66781Q344.01011,68.32735,344.0094,71.68746Zm-15.88357,1.3956a19.45034,19.45034,0,0,0-7.84072,1.30549,5.43115,5.43115,0,0,0-1.83587,8.6117c3.20723,3.32839,12.88193,1.13852,14.39805-3.259C334.36551,75.33767,332.8235,73.04179,328.12583,73.08306Z"/><path class="kl3-txt" d="M456.26215,71.48017c.00088-5.51381.03716-11.028-.01889-16.54123-.0194-1.90413.56484-2.94488,2.66721-2.78357a12.35922,12.35922,0,0,0,3.0878-.19249c2.66254-.47649,4.34621.2418,4.59025,3.23378.16422,2.014.98145,1.91388,2.43739.77863a21.62233,21.62233,0,0,1,15.40892-4.7833c6.87542.51238,11.6589,5.15422,11.73479,12.001.09156,8.26976-.02787,16.54185.0568,24.81175.02218,2.1663-.81672,2.79012-2.89526,2.81049-8.27885.08121-8.27752.13667-8.2748-8.00778q.00255-7.484-.00095-14.96792c-.008-6.38857-3.54352-9.17007-9.72139-7.608a19.61993,19.61993,0,0,0-5.76588,2.83988A3.89268,3.89268,0,0,0,467.679,66.735c.06288,6.97782-.0489,13.95766.05675,20.93441.03557,2.35259-.76706,3.3131-3.14126,3.12126a28.52568,28.52568,0,0,0-5.16533.02005c-2.59752.26493-3.25664-.93158-3.20457-3.30681C456.34164,82.165,456.26133,76.82169,456.26215,71.48017Z"/><path class="kl3-txt" d="M435.01373,74.19527c-3.62193,0-7.24646.08365-10.8648-.02974-2.37249-.07435-2.80521,1.04814-2.39739,3.05611.82493,4.06119,4.366,6.80763,9.316,7.16659a25.70656,25.70656,0,0,0,12.40611-1.90062c1.87678-.82618,2.57831-.2125,3.0818,1.59324,1.21544,4.35907,1.19819,4.60164-3.14208,6.10435a32.09474,32.09474,0,0,1-17.31989,1.338c-12.61754-2.65482-18.00232-11.43078-16.1397-24.06341,1.427-9.67827,9.0569-15.96615,18.84477-16.2928,5.68278-.18964,10.9695.60985,15.34579,4.73809,4.94929,4.66877,5.28141,10.572,4.78379,16.73716-.12517,1.55015-1.38289,1.53348-2.53122,1.53523q-5.69157.00871-11.38315.00218Zm-4.84963-6.37913c2.15348,0,4.309-.05829,6.45976.01972,1.52955.05547,2.12732-.43238,2.07728-2.07189-.14319-4.68751-3.06051-7.564-7.94907-7.62394-4.6226-.05667-9.08482,3.88327-9.22877,8.03137-.04587,1.32239.52087,1.65813,1.66358,1.64736C425.51243,67.79684,427.83836,67.81221,430.1641,67.81614Z"/><path class="kl3-txt" d="M389.97992,90.77507c-4.398.00218-8.79681.04583-13.19369-.02631-1.20824-.01983-2.86339.66-3.50634-.82713a5.15828,5.15828,0,0,1,.57629-5.17533q3.47226-4.82752,7.04347-9.5838c3.20059-4.27752,6.44232-8.52436,9.65062-12.79624.39525-.52632,1.13778-1.03055.78721-1.77411-.35645-.75606-1.22113-.47626-1.87154-.48134-4.31152-.03367-8.62481-.09581-12.93471-.01093-2.27639.04482-3.27184-.72846-3.20113-3.14518.14179-4.84527-.38732-4.9657,4.83409-4.91132,7.74781.08071,15.50036-.28658,23.25789.10413,4.1035.20667,5.61625,2.57582,3.60734,6.3052a42.72253,42.72253,0,0,1-3.27161,4.64376q-6.38368,8.78648-12.76945,17.57138c-.38545.5326-1.1235,1.07491-.78936,1.784.34773.73784,1.2308.43052,1.87925.43437,4.65659.02755,9.31508.0933,13.96928-.01512,2.302-.05363,3.44393.70151,3.12306,3.11945a10.55837,10.55837,0,0,0-.00834,1.29208c-.02749,3.42033-.06762,3.47541-3.47079,3.48653C399.121,90.78411,394.55046,90.77289,389.97992,90.77507Z"/><path class="kl3-txt" d="M298.91812,60.10886q0,13.304-.00067,26.608c-.001,4.05391-.00432,4.05511-4.18065,4.06168-1.6366.00255-3.27512-.05086-4.90926.01187-1.49963.05748-2.27951-.55083-2.2767-2.0785.00016-.086-.01071-.172-.01071-.258q-.00711-28.15782-.0255-56.31562c-.0024-1.87162.83527-2.64313,2.674-2.58534,1.97915.0622,3.967.101,5.94158-.014,2.1889-.12754,2.8171.87363,2.80206,2.92876-.06726,9.21329-.02922,18.42738-.02922,27.64117Z"/><path class="kl3-txt" d="M354.24247,71.23568c0-5.50875.05112-11.01823-.02705-16.52586-.02837-2.0003.62-2.79322,2.71457-2.58494a44.70481,44.70481,0,0,0,6.194.05085c1.77659-.07125,2.50046.67909,2.4815,2.4225q-.18378,16.89261-.2962,33.78591c-.0097,1.80467-.79125,2.46114-2.50725,2.39529-1.63341-.06272-3.2713-.00221-4.90723-.00493-3.652-.00606-3.66244-.00833-3.66965-3.78733q-.015-7.87577-.00253-15.75149Z"/><path class="kl3-txt" d="M366.83757,35.3833a6.90085,6.90085,0,0,1-6.96274,7.09787c-4.2955-.00509-7.29083-2.9121-7.24928-7.03554a6.878,6.878,0,0,1,7.11848-6.94109A6.73906,6.73906,0,0,1,366.83757,35.3833Z"/><path class="kl3-ic" d="M90.92.00742q39.16863,0,78.33724.00368a11.98473,11.98473,0,0,1,6.92047,1.71822c3.62,2.44183,4.36587,6.151,4.062,10.13424-.32873,4.30958-.67578,4.43013-5.02242,4.65618a109.44091,109.44091,0,0,0-24.49466,4.50792c-17.88412,5.1294-33.85806,13.9488-48.66269,25.06624C92.37509,53.36667,83.065,61.10916,73.587,68.641c-5.1468,4.09-10.9349,7.1089-16.70337,10.154a134.28566,134.28566,0,0,1-37.60958,13.63A106.393,106.393,0,0,1,1.81531,94.32169C.4815,94.35279-.0021,93.94174,0,92.55633q.06162-40.44565.063-80.8914C.07353,4.33067,4.56065.034,12.157.01649,25.497-.0143,38.83706.0075,52.1771.0074Q71.54854.00726,90.92.00742Z"/><path class="kl3-ic" d="M2.87437,125.065a4.05486,4.05486,0,0,1,2.9859-.73415A112.80511,112.80511,0,0,0,37.118,120.26823,103.31068,103.31068,0,0,0,73.67288,101.058c9.72479-7.73949,18.2855-16.70212,26.85119-25.65951,5.65477-5.91335,11.28711-11.8518,17.22232-17.48787,11.79233-11.19795,24.58425-21.00626,39.30593-28.11474a86.36539,86.36539,0,0,1,19.75036-6.97466c.50865-.10716,1.01991-.2151,1.53552-.27322a1.44748,1.44748,0,0,1,1.82,1.32391,14.09416,14.09416,0,0,1,.1576,1.974q.01134,43.56774-.00587,87.13547a13.97924,13.97924,0,0,1-1.97066,7.73255,10.58372,10.58372,0,0,1-8.83951,5.10859c-7.41881.3694-14.83863-.03039-22.25834-.0215q-70.38964.08426-140.77948.02616C5.25284,125.82711,4.00874,125.95327,2.87437,125.065Z"/></svg></div>
-      <div class="tb-name" style="display:none">klai<em>zen</em></div>
-      <div class="tb-bc">
-        <span class="tb-bc-link" onclick="backToGroups()">Mis grupos</span>
-        <span class="tb-bc-sep">/</span>
-        <span class="tb-bc-cur" id="tb-cur-group">—</span>
-      </div>
+  <!-- Topbar -->
+  <div class="topbar">
+    <svg class="topbar-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946">
+      <path class="kl1" style="fill:#464646" d="M243.97,56.12c4.46-3.64,7.94-7.88,11.48-12.05,3.68-4.33,7.41-8.63,11.09-12.96a3.84,3.84,0,0,1,3.11-1.54c2.93,0,5.86-.01,8.79.01.66,0,1.51-.21,1.82.6.25.66-.41,1.07-.81,1.5q-6.28,6.87-12.56,13.73c-2.5,2.74-4.86,5.61-7.48,8.22-1.55,1.55-1.52,2.64-.23,4.35,6.21,8.16,12.3,16.42,18.41,24.65,1.49,2.01,2.92,4.06,4.37,6.09.91,1.28.77,2.05-1,2.05-3.45-.01-6.9-.05-10.35.02-1.55.03-2.28-.92-3.05-2.01-5.6-7.97-11.27-15.89-16.79-23.91-1.3-1.89-1.87-1.79-3.56-.23-2.77,2.56-3.47,5.44-3.31,9,.21,4.64-.06,9.31.08,13.96.08,2.51-.87,3.42-3.32,3.21a43.43,43.43,0,0,0-5.69-.01c-1.92.1-2.48-.77-2.57-2.61-.29-5.86-.09-11.7-.03-17.56.12-12.32-.15-24.64-.24-36.96-.03-4.1.03-4.17,4.23-4.11,8.74.12,7.51-1.23,7.58,7.47C244.01,43.39,243.97,49.75,243.97,56.12Z"/>
+      <path class="kl1" style="fill:#464646" d="M344.01,71.69c0,3.02-.03,6.03.01,9.05.02,2.01.78,3.64,2.98,3.87,1.28.13,2.29.25,2.09,1.82-.22,1.72.93,3.9-1.67,4.87-4.28,1.6-10.03-.07-12.36-3.93-.9-1.5-1.35-1.14-2.42-.3-5.78,4.56-12.22,6.36-19.35,3.84-4.18-1.48-6.91-4.42-7.23-9.15-.34-5.13,1.38-9.12,6.15-11.49,4.92-2.45,10.21-2.94,15.6-2.93a4.91,4.91,0,0,0,1.03-.01c1.48-.32,3.69,1,4.14-1.73a5.32,5.32,0,0,0-3.22-6.1c-3.64-1.32-7.32-.84-10.96-.04a18,18,0,0,0-4.66,1.49c-2.39,1.28-3.22.41-3.92-1.9-1.22-4.07-1.33-3.97,2.62-5.47a33.89,33.89,0,0,1,21.8-1.28c6.92,1.98,9.37,5.53,9.37,12.67Q344.01,68.33,344.01,71.69Zm-15.88,1.4a19.45,19.45,0,0,0-7.84,1.31,5.43,5.43,0,0,0-1.84,8.61c3.21,3.33,12.88,1.14,14.4-3.26C334.37,75.34,332.82,73.04,328.13,73.08Z"/>
+      <path class="kl1" style="fill:#464646" d="M456.26,71.48c0-5.51.04-11.03-.02-16.54-.02-1.9.56-2.94,2.67-2.78a12.36,12.36,0,0,0,3.09-.19c2.66-.48,4.35.24,4.59,3.23.16,2.01.98,1.91,2.44.78a21.62,21.62,0,0,1,15.41-4.78c6.88.51,11.66,5.15,11.73,12,.09,8.27-.03,16.54.06,24.81.02,2.17-.82,2.79-2.9,2.81-8.28.08-8.28.14-8.27-8.01q0-7.48,0-14.97c-.01-6.39-3.54-9.17-9.72-7.61a19.62,19.62,0,0,0-5.77,2.84,3.89,3.89,0,0,0-1.96,3.69c.06,6.98-.05,13.96.06,20.93.04,2.35-.77,3.31-3.14,3.12a28.53,28.53,0,0,0-5.17.02c-2.6.26-3.26-.93-3.2-3.31C456.34,82.17,456.26,76.82,456.26,71.48Z"/>
+      <path class="kl1" style="fill:#464646" d="M435.01,74.2c-3.62,0-7.25.08-10.86-.03-2.37-.07-2.81,1.05-2.4,3.06.82,4.06,4.37,6.81,9.32,7.17a25.71,25.71,0,0,0,12.41-1.9c1.88-.83,2.58-.21,3.08,1.59,1.22,4.36,1.2,4.6-3.14,6.1a32.09,32.09,0,0,1-17.32,1.34c-12.62-2.65-18-11.43-16.14-24.06,1.43-9.68,9.06-15.97,18.84-16.29,5.68-.19,10.97.61,15.35,4.74,4.95,4.67,5.28,10.57,4.78,16.74-.13,1.55-1.38,1.53-2.53,1.54Q437.69,74.2,435.01,74.2Zm-4.85-6.38c2.15,0,4.31-.06,6.46.02,1.53.06,2.13-.43,2.08-2.07-.14-4.69-3.06-7.56-7.95-7.62-4.62-.06-9.08,3.88-9.23,8.03-.05,1.32.52,1.66,1.66,1.65C425.51,67.8,427.84,67.81,430.16,67.82Z"/>
+      <path class="kl1" style="fill:#464646" d="M390,90.78c-4.4,0-8.8.05-13.19-.03-1.21-.02-2.86.66-3.51-.83a5.16,5.16,0,0,1,.58-5.18q3.47-4.83,7.04-9.58c3.2-4.28,6.44-8.52,9.65-12.8.4-.53,1.14-1.03.79-1.77-.36-.76-1.22-.48-1.87-.48-4.31-.03-8.62-.1-12.93-.01-2.28.04-3.27-.73-3.2-3.15.14-4.85-.39-4.97,4.83-4.91,7.75.08,15.5-.29,23.26.1,4.1.21,5.62,2.58,3.61,6.31a42.72,42.72,0,0,1-3.27,4.64q-6.38,8.79-12.77,17.57c-.39.53-1.12,1.07-.79,1.78.35.74,1.23.43,1.88.43,4.66.03,9.32.09,13.97-.02,2.3-.05,3.44.7,3.12,3.12a10.56,10.56,0,0,0-.01,1.29c-.03,3.42-.07,3.48-3.47,3.49C399.12,90.78,394.55,90.77,390,90.78Z"/>
+      <path class="kl1" style="fill:#464646" d="M298.92,60.11q0,13.3,0,26.61c0,4.05,0,4.05-4.18,4.06-1.64,0-3.28-.05-4.91.01-1.5.06-2.28-.55-2.28-2.08v-.26q0-28.16-.03-56.32c0-1.87.84-2.64,2.67-2.59,1.98.06,3.97.1,5.94-.01,2.19-.13,2.82.87,2.8,2.93-.07,9.21-.03,18.43-.03,27.64Z"/>
+      <path class="kl1" style="fill:#464646" d="M354.24,71.24c0-5.51.05-11.02-.03-16.53-.03-2,.62-2.79,2.71-2.58a44.7,44.7,0,0,0,6.19.05c1.78-.07,2.5.68,2.48,2.42q-.18,16.89-.3,33.79c-.01,1.8-.79,2.46-2.51,2.4-1.63-.06-3.27,0-4.91,0-3.65,0-3.66,0-3.67-3.79q-.01-7.88,0-15.75Z"/>
+      <path class="kl1" style="fill:#464646" d="M366.84,35.38a6.9,6.9,0,0,1-6.96,7.1c-4.3-.01-7.29-2.91-7.25-7.04a6.88,6.88,0,0,1,7.12-6.94A6.74,6.74,0,0,1,366.84,35.38Z"/>
+      <path style="fill:#f36a15" d="M90.92,0q39.17,0,78.34.004a12,12,0,0,1,6.92,1.72c3.62,2.44,4.37,6.15,4.06,10.13-.33,4.31-.68,4.43-5.02,4.66a109.44,109.44,0,0,0-24.49,4.51c-17.88,5.13-33.86,13.95-48.66,25.07C92.38,53.37,83.07,61.11,73.59,68.64c-5.15,4.09-10.93,7.11-16.7,10.15a134.29,134.29,0,0,1-37.61,13.63A106.39,106.39,0,0,1,1.82,94.32C.48,94.35,0,93.94,0,92.56q.06-40.45.06-80.89C.07,4.33,4.56.03,12.16.02,25.5-.01,38.84.01,52.18.01Q71.55,0,90.92,0Z"/>
+      <path style="fill:#f36a15" d="M2.87,125.07a4.05,4.05,0,0,1,2.99-.73A112.81,112.81,0,0,0,37.12,120.27,103.31,103.31,0,0,0,73.67,101.06c9.72-7.74,18.29-16.7,26.85-25.66,5.65-5.91,11.29-11.85,17.22-17.49,11.79-11.2,24.58-21.01,39.31-28.11a86.37,86.37,0,0,1,19.75-6.97c.51-.11,1.02-.22,1.54-.27a1.45,1.45,0,0,1,1.82,1.32,14.09,14.09,0,0,1,.16,1.97q.01,43.57-.01,87.14a13.98,13.98,0,0,1-1.97,7.73,10.58,10.58,0,0,1-8.84,5.11c-7.42.37-14.84-.03-22.26-.02q-70.39.08-140.78.03C5.25,125.83,4.01,125.95,2.87,125.07Z"/>
+    </svg>
+    <div class="topbar-right">
+      <span class="user-chip" id="user-chip">—</span>
+      <button class="btn-ghost" onclick="doLogout()">Salir</button>
     </div>
-    <div class="tb-r">
-      <div class="tb-pill" onclick="backToGroups()">← Cambiar grupo</div>
-      <div class="av">LM</div>
-    </div>
-  </header>
-  <div class="mc">
-    <div class="pg-hdr">
-      <div><div class="pg-title" id="dash-gname">—</div><div class="pg-sub" id="dash-gsub">—</div></div>
-      <div class="pg-badge"><div class="pg-bdot"></div><span id="dash-gsubj">—</span></div>
-    </div>
-    <div class="sec-lbl">📊 Indicadores del grupo</div>
-    <div class="ind-grid" id="ind-grid"></div>
-    <div class="sec-lbl">📈 Evolución · últimas 8 semanas</div>
-    <div class="chart-card">
-      <div class="chart-hdr"><div class="chart-ttl">Índice de clima general</div><div class="chart-leg"><div class="chart-dot"></div>Klaizen Score / 100</div></div>
-      <div class="chart-cv"><svg id="chart-svg" viewBox="0 0 600 90" preserveAspectRatio="none"></svg></div>
-    </div>
-    <div class="no-diag" id="no-diag">
-      <div class="no-diag-ico">🔍</div>
-      <div class="no-diag-txt"><strong>Esta clase aún no tiene diagnóstico.</strong><br>Realiza la <strong>Evaluación</strong> y el <strong>Sociograma</strong> para obtener una visión completa del grupo.</div>
-    </div>
-    <div class="diag-blk" id="diag-blk">
-      <div class="diag-ttl">✅ Diagnóstico del aula</div>
-      <div class="diag-area">Área principal a mejorar: <strong>Cohesión del grupo</strong></div>
-      <div class="diag-sum">Se detecta baja conexión entre alumnos y oportunidades significativas de mejora en relaciones interpersonales y sentido de pertenencia.</div>
-    </div>
-    <div class="sec-lbl">🎯 Actividades</div>
-    <div class="acts" id="acts-list"></div>
   </div>
-</section>
 
-<!-- ═══ 4. LOBBY (pantalla tipo proyector) ═══ -->
-<section id="s-lobby" class="screen">
-  <header class="lobby-bar">
-    <div class="lobby-bar-l">
-      <button class="lobby-back" onclick="backToMain()">←</button>
-      <div class="lobby-act-name" id="lobby-act-name">Actividad</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="proj-pill"><div class="proj-dot"></div>Sala de espera</div>
-    </div>
-  </header>
-  <div class="lobby-body">
-    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;justify-content:center">
-      <!-- Code card - pantalla proyector -->
-      <div class="lobby-join-card">
-        <div class="lj-url">klaizen.eu/app</div>
-        <div class="lj-instr">Los alumnos deben acceder a<br><strong style="color:rgba(255,106,0,.9)">klaizen.eu/app</strong> e introducir este código</div>
-        <div class="lj-code-label">Código de sesión</div>
-        <div class="lj-code" id="lobby-code">—</div>
-        <div class="lj-code-sub">Escríbelo en klaizen.eu/app</div>
-      </div>
-      <!-- Students panel -->
-      <div class="lobby-students">
-        <div class="ls-count">Alumnos conectados: <span id="ls-count-n">0</span></div>
-        <div class="ls-avatars" id="ls-avatars"><div class="ls-waiting">Esperando conexiones...</div></div>
-        <button class="btn btn-or lobby-start-btn" id="lobby-start-btn" onclick="beginActivity()" disabled>
-          Iniciar actividad →
-        </button>
-        <div style="margin-top:12px;font-size:12px;color:#9ca3af">Mínimo 1 alumno para comenzar</div>
-      </div>
-    </div>
+  <!-- Tab nav -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="btn-t-diag" onclick="switchTab('diag')">
+      <span class="t-icon">🔍</span><span class="t-label">Diagnóstico</span>
+    </button>
+    <button class="tab-btn" id="btn-t-interv" onclick="switchTab('interv')">
+      <span class="t-icon">🎯</span><span class="t-label">Intervención</span>
+      <span class="notif-dot" id="nd-interv" style="display:none"></span>
+    </button>
+    <button class="tab-btn" id="btn-t-checkin" onclick="switchTab('checkin')">
+      <span class="t-icon">📝</span><span class="t-label">Check-in</span>
+      <span class="notif-dot" id="nd-checkin" style="display:none"></span>
+    </button>
   </div>
-</section>
 
-<!-- ═══ 5. ACTIVITY PROJECTION (teacher) ═══ -->
-<section id="s-activity" class="screen">
-  <header class="proj-bar">
-    <div class="proj-bar-l">
-      <button class="proj-back" onclick="endActivity()">←</button>
-      <div class="proj-act-name" id="proj-act-name">Actividad</div>
-    </div>
-    <div class="proj-bar-r">
-      <div class="proj-pill"><div class="proj-dot"></div>Proyectando</div>
-      <div class="prog-out"><div class="prog-in" id="prog-in" style="width:0%"></div></div>
-      <div class="prog-lbl" id="prog-lbl">Paso 1</div>
-    </div>
-  </header>
-  <div class="proj-wrap">
-    <div id="flow-body" style="width:100%;display:flex;justify-content:center"></div>
-  </div>
-</section>
+  <!-- Scrollable content -->
+  <div class="tab-content">
 
-<!-- ═══ 6. STUDENT SCREEN (/app) ═══ -->
-<section id="s-student" class="screen">
-  <!-- Join form -->
-  <div id="stu-join-form" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:20px;width:100%">
-    <div class="stu-card">
-      <div class="stu-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496.22685 125.97946" style="height:36px;width:auto"><defs><style>.kl4-txt{fill:#1a1a1a;}.kl4-ic{fill:#f36a15;}</style></defs><path class="kl4-txt" d="M243.96864,56.11857c4.45682-3.6448,7.9363-7.87949,11.48389-12.05451,3.68147-4.33251,7.40637-8.62808,11.09134-12.95762a3.83886,3.83886,0,0,1,3.11329-1.53893c2.93132.0303,5.86323-.008,8.79467.01481.65571.0051,1.51126-.21155,1.81716.59976.24707.65532-.41487,1.06576-.80933,1.49749q-6.277,6.86963-12.56253,13.73139c-2.49515,2.73874-4.85568,5.60961-7.47594,8.22131-1.55363,1.54859-1.52191,2.64427-.22862,4.345,6.20764,8.16353,12.29923,16.41533,18.41476,24.64865,1.49016,2.00623,2.91858,4.05839,4.36849,6.09437.91425,1.28378.771,2.05368-.99981,2.04888-3.44893-.00935-6.8987-.04716-10.34646.01652-1.54864.02855-2.28129-.91522-3.04919-2.00924-5.59562-7.97165-11.26785-15.89027-16.79175-23.9111-1.304-1.89343-1.87128-1.793-3.56175-.23032-2.76993,2.56057-3.46921,5.43948-3.3071,8.99671.21162,4.64485-.06069,9.31018.08177,13.96033.077,2.51421-.86977,3.41527-3.32163,3.21383a43.42526,43.42526,0,0,0-5.68731-.0084c-1.92429.09529-2.48083-.77082-2.5717-2.6089-.28956-5.85762-.08666-11.70346-.031-17.55961.11715-12.31967-.1538-24.64283-.23968-36.96475-.02856-4.09675.02894-4.17009,4.22574-4.11483,8.74193.11509,7.5052-1.23139,7.58169,7.474C244.01363,43.388,243.96864,49.75348,243.96864,56.11857Z"/><path class="kl4-txt" d="M344.0094,71.68746c-.00025,3.0154-.02619,6.03111.00888,9.04612.02334,2.009.77646,3.64321,2.97867,3.87232,1.28182.13335,2.29212.25059,2.09431,1.81907-.21744,1.72365.92543,3.89851-1.674,4.869-4.27907,1.59766-10.0302-.07034-12.36147-3.92712-.90433-1.49612-1.35174-1.13994-2.41628-.299-5.77748,4.56383-12.22486,6.36256-19.34731,3.83692-4.1762-1.48092-6.91207-4.4181-7.22956-9.14637-.34473-5.13326,1.38141-9.11923,6.15168-11.4903,4.92167-2.44629,10.2131-2.94056,15.59845-2.92571a4.91352,4.91352,0,0,0,1.03195-.00886c1.48368-.32175,3.68983,1.00308,4.13658-1.72826a5.32486,5.32486,0,0,0-3.21965-6.10439c-3.63795-1.3179-7.31885-.83518-10.96337-.0409a18.02521,18.02521,0,0,0-4.66257,1.49458c-2.39168,1.28019-3.22148.411-3.91807-1.90472-1.22284-4.06507-1.33456-3.9722,2.6232-5.47011a33.8893,33.8893,0,0,1,21.79541-1.28032c6.9205,1.98379,9.37221,5.5293,9.37335,12.66781Q344.01011,68.32735,344.0094,71.68746Zm-15.88357,1.3956a19.45034,19.45034,0,0,0-7.84072,1.30549,5.43115,5.43115,0,0,0-1.83587,8.6117c3.20723,3.32839,12.88193,1.13852,14.39805-3.259C334.36551,75.33767,332.8235,73.04179,328.12583,73.08306Z"/><path class="kl4-txt" d="M456.26215,71.48017c.00088-5.51381.03716-11.028-.01889-16.54123-.0194-1.90413.56484-2.94488,2.66721-2.78357a12.35922,12.35922,0,0,0,3.0878-.19249c2.66254-.47649,4.34621.2418,4.59025,3.23378.16422,2.014.98145,1.91388,2.43739.77863a21.62233,21.62233,0,0,1,15.40892-4.7833c6.87542.51238,11.6589,5.15422,11.73479,12.001.09156,8.26976-.02787,16.54185.0568,24.81175.02218,2.1663-.81672,2.79012-2.89526,2.81049-8.27885.08121-8.27752.13667-8.2748-8.00778q.00255-7.484-.00095-14.96792c-.008-6.38857-3.54352-9.17007-9.72139-7.608a19.61993,19.61993,0,0,0-5.76588,2.83988A3.89268,3.89268,0,0,0,467.679,66.735c.06288,6.97782-.0489,13.95766.05675,20.93441.03557,2.35259-.76706,3.3131-3.14126,3.12126a28.52568,28.52568,0,0,0-5.16533.02005c-2.59752.26493-3.25664-.93158-3.20457-3.30681C456.34164,82.165,456.26133,76.82169,456.26215,71.48017Z"/><path class="kl4-txt" d="M435.01373,74.19527c-3.62193,0-7.24646.08365-10.8648-.02974-2.37249-.07435-2.80521,1.04814-2.39739,3.05611.82493,4.06119,4.366,6.80763,9.316,7.16659a25.70656,25.70656,0,0,0,12.40611-1.90062c1.87678-.82618,2.57831-.2125,3.0818,1.59324,1.21544,4.35907,1.19819,4.60164-3.14208,6.10435a32.09474,32.09474,0,0,1-17.31989,1.338c-12.61754-2.65482-18.00232-11.43078-16.1397-24.06341,1.427-9.67827,9.0569-15.96615,18.84477-16.2928,5.68278-.18964,10.9695.60985,15.34579,4.73809,4.94929,4.66877,5.28141,10.572,4.78379,16.73716-.12517,1.55015-1.38289,1.53348-2.53122,1.53523q-5.69157.00871-11.38315.00218Zm-4.84963-6.37913c2.15348,0,4.309-.05829,6.45976.01972,1.52955.05547,2.12732-.43238,2.07728-2.07189-.14319-4.68751-3.06051-7.564-7.94907-7.62394-4.6226-.05667-9.08482,3.88327-9.22877,8.03137-.04587,1.32239.52087,1.65813,1.66358,1.64736C425.51243,67.79684,427.83836,67.81221,430.1641,67.81614Z"/><path class="kl4-txt" d="M389.97992,90.77507c-4.398.00218-8.79681.04583-13.19369-.02631-1.20824-.01983-2.86339.66-3.50634-.82713a5.15828,5.15828,0,0,1,.57629-5.17533q3.47226-4.82752,7.04347-9.5838c3.20059-4.27752,6.44232-8.52436,9.65062-12.79624.39525-.52632,1.13778-1.03055.78721-1.77411-.35645-.75606-1.22113-.47626-1.87154-.48134-4.31152-.03367-8.62481-.09581-12.93471-.01093-2.27639.04482-3.27184-.72846-3.20113-3.14518.14179-4.84527-.38732-4.9657,4.83409-4.91132,7.74781.08071,15.50036-.28658,23.25789.10413,4.1035.20667,5.61625,2.57582,3.60734,6.3052a42.72253,42.72253,0,0,1-3.27161,4.64376q-6.38368,8.78648-12.76945,17.57138c-.38545.5326-1.1235,1.07491-.78936,1.784.34773.73784,1.2308.43052,1.87925.43437,4.65659.02755,9.31508.0933,13.96928-.01512,2.302-.05363,3.44393.70151,3.12306,3.11945a10.55837,10.55837,0,0,0-.00834,1.29208c-.02749,3.42033-.06762,3.47541-3.47079,3.48653C399.121,90.78411,394.55046,90.77289,389.97992,90.77507Z"/><path class="kl4-txt" d="M298.91812,60.10886q0,13.304-.00067,26.608c-.001,4.05391-.00432,4.05511-4.18065,4.06168-1.6366.00255-3.27512-.05086-4.90926.01187-1.49963.05748-2.27951-.55083-2.2767-2.0785.00016-.086-.01071-.172-.01071-.258q-.00711-28.15782-.0255-56.31562c-.0024-1.87162.83527-2.64313,2.674-2.58534,1.97915.0622,3.967.101,5.94158-.014,2.1889-.12754,2.8171.87363,2.80206,2.92876-.06726,9.21329-.02922,18.42738-.02922,27.64117Z"/><path class="kl4-txt" d="M354.24247,71.23568c0-5.50875.05112-11.01823-.02705-16.52586-.02837-2.0003.62-2.79322,2.71457-2.58494a44.70481,44.70481,0,0,0,6.194.05085c1.77659-.07125,2.50046.67909,2.4815,2.4225q-.18378,16.89261-.2962,33.78591c-.0097,1.80467-.79125,2.46114-2.50725,2.39529-1.63341-.06272-3.2713-.00221-4.90723-.00493-3.652-.00606-3.66244-.00833-3.66965-3.78733q-.015-7.87577-.00253-15.75149Z"/><path class="kl4-txt" d="M366.83757,35.3833a6.90085,6.90085,0,0,1-6.96274,7.09787c-4.2955-.00509-7.29083-2.9121-7.24928-7.03554a6.878,6.878,0,0,1,7.11848-6.94109A6.73906,6.73906,0,0,1,366.83757,35.3833Z"/><path class="kl4-ic" d="M90.92.00742q39.16863,0,78.33724.00368a11.98473,11.98473,0,0,1,6.92047,1.71822c3.62,2.44183,4.36587,6.151,4.062,10.13424-.32873,4.30958-.67578,4.43013-5.02242,4.65618a109.44091,109.44091,0,0,0-24.49466,4.50792c-17.88412,5.1294-33.85806,13.9488-48.66269,25.06624C92.37509,53.36667,83.065,61.10916,73.587,68.641c-5.1468,4.09-10.9349,7.1089-16.70337,10.154a134.28566,134.28566,0,0,1-37.60958,13.63A106.393,106.393,0,0,1,1.81531,94.32169C.4815,94.35279-.0021,93.94174,0,92.55633q.06162-40.44565.063-80.8914C.07353,4.33067,4.56065.034,12.157.01649,25.497-.0143,38.83706.0075,52.1771.0074Q71.54854.00726,90.92.00742Z"/><path class="kl4-ic" d="M2.87437,125.065a4.05486,4.05486,0,0,1,2.9859-.73415A112.80511,112.80511,0,0,0,37.118,120.26823,103.31068,103.31068,0,0,0,73.67288,101.058c9.72479-7.73949,18.2855-16.70212,26.85119-25.65951,5.65477-5.91335,11.28711-11.8518,17.22232-17.48787,11.79233-11.19795,24.58425-21.00626,39.30593-28.11474a86.36539,86.36539,0,0,1,19.75036-6.97466c.50865-.10716,1.01991-.2151,1.53552-.27322a1.44748,1.44748,0,0,1,1.82,1.32391,14.09416,14.09416,0,0,1,.1576,1.974q.01134,43.56774-.00587,87.13547a13.97924,13.97924,0,0,1-1.97066,7.73255,10.58372,10.58372,0,0,1-8.83951,5.10859c-7.41881.3694-14.83863-.03039-22.25834-.0215q-70.38964.08426-140.77948.02616C5.25284,125.82711,4.00874,125.95327,2.87437,125.065Z"/></svg>
+    <!-- ── TAB 1: DIAGNÓSTICO ── -->
+    <div class="tab-pane active" id="tab-diag">
+
+      <!-- STEP 1 -->
+      <div class="diag-step active" id="ds1">
+        <div class="steps">
+          <div class="step-dot active" id="dot1">1</div>
+          <div class="step-line" id="ln1"></div>
+          <div class="step-dot" id="dot2">2</div>
+          <div class="step-line" id="ln2"></div>
+          <div class="step-dot" id="dot3">3</div>
+        </div>
+        <div class="card">
+          <p class="card-title">Contexto del aula</p>
+          <p class="card-sub">Antes de empezar, cuéntanos un poco</p>
+          <div class="sec-label">Información básica</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">Asignatura</label>
+              <input class="inp" id="d-subj" type="text" placeholder="Ej: Matemáticas">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">Etapa</label>
+              <select class="inp" id="d-stage">
+                <option>Primaria</option><option selected>ESO</option>
+                <option>Bachillerato</option><option>FP</option>
+              </select>
+            </div>
+          </div>
+          <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:8px">¿Eres tutor/a de este grupo?</label>
+          <div class="radio-row">
+            <div class="radio-pill"><input type="radio" name="tutor" id="t-si" value="si"><label for="t-si">✅ Sí, soy tutor/a</label></div>
+            <div class="radio-pill"><input type="radio" name="tutor" id="t-no" value="no" checked><label for="t-no">No soy tutor/a</label></div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="card-title">Termómetro de hoy</p>
+          <p class="card-sub">¿Cómo definirías el clima en este momento?</p>
+          <div class="thermo-grid">
+            <div class="thermo-item caotic" onclick="pickThermo(this,'caotic')"><span class="thermo-emoji">🔴</span><div><p class="thermo-name">Caótico</p><p class="thermo-desc">Sin control, mucho ruido</p></div></div>
+            <div class="thermo-item unstable" onclick="pickThermo(this,'unstable')"><span class="thermo-emoji">🟠</span><div><p class="thermo-name">Inestable</p><p class="thermo-desc">Intermitente, difícil de sostener</p></div></div>
+            <div class="thermo-item improving" onclick="pickThermo(this,'improving')"><span class="thermo-emoji">🟡</span><div><p class="thermo-name">Mejorando</p><p class="thermo-desc">Progreso con altibajos</p></div></div>
+            <div class="thermo-item stable" onclick="pickThermo(this,'stable')"><span class="thermo-emoji">🟢</span><div><p class="thermo-name">Estable</p><p class="thermo-desc">Buen clima de trabajo</p></div></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="goDS(2)">Siguiente: valorar indicadores →</button>
       </div>
-      <div class="stu-title">Klaizen</div>
-      <div class="stu-sub">Introduce el código de sesión</div>
-      <div class="stu-field">
-        <label>Código de sesión</label>
-        <input type="text" id="stu-code-inp" placeholder="ej. 48291" maxlength="10" oninput="this.value=this.value.toUpperCase()"/>
+
+      <!-- STEP 2 -->
+      <div class="diag-step" id="ds2">
+        <div class="steps">
+          <div class="step-dot done">✓</div>
+          <div class="step-line done"></div>
+          <div class="step-dot active">2</div>
+          <div class="step-line"></div>
+          <div class="step-dot">3</div>
+        </div>
+        <div class="card">
+          <p class="card-title">Indicadores del aula</p>
+          <p class="card-sub">Valora del 1 (mínimo) al 5 (máximo)</p>
+          <div class="sec-label">Comportamiento</div>
+          <div class="slider-row"><div class="slider-head"><span>🔊 Nivel de ruido</span><span class="slider-val" id="v-ruido">3</span></div><input type="range" min="1" max="5" value="3" id="s-ruido" oninput="upd(this,'v-ruido')"></div>
+          <div class="slider-row"><div class="slider-head"><span>🙋 Interrupciones</span><span class="slider-val" id="v-inter">3</span></div><input type="range" min="1" max="5" value="3" id="s-inter" oninput="upd(this,'v-inter')"></div>
+          <div class="slider-row"><div class="slider-head"><span>👁️ Atención del grupo</span><span class="slider-val" id="v-aten">3</span></div><input type="range" min="1" max="5" value="3" id="s-aten" oninput="upd(this,'v-aten')"></div>
+          <div class="slider-row"><div class="slider-head"><span>⚡ Conflictos entre alumnos</span><span class="slider-val" id="v-conf">2</span></div><input type="range" min="1" max="5" value="2" id="s-conf" oninput="upd(this,'v-conf')"></div>
+          <div class="slider-row"><div class="slider-head"><span>🤝 Respeto hacia el docente</span><span class="slider-val" id="v-resp">3</span></div><input type="range" min="1" max="5" value="3" id="s-resp" oninput="upd(this,'v-resp')"></div>
+          <div class="divider"></div>
+          <div class="sec-label">Autorregulación</div>
+          <div class="slider-row"><div class="slider-head"><span>💥 Impulsividad</span><span class="slider-val" id="v-impul">3</span></div><input type="range" min="1" max="5" value="3" id="s-impul" oninput="upd(this,'v-impul')"></div>
+          <div class="slider-row"><div class="slider-head"><span>😤 Tolerancia a la frustración</span><span class="slider-val" id="v-frus">3</span></div><input type="range" min="1" max="5" value="3" id="s-frus" oninput="upd(this,'v-frus')"></div>
+          <div class="slider-row"><div class="slider-head"><span>🧠 Autonomía en el trabajo</span><span class="slider-val" id="v-auto">3</span></div><input type="range" min="1" max="5" value="3" id="s-auto" oninput="upd(this,'v-auto')"></div>
+          <div class="divider"></div>
+          <div class="sec-label">Estado docente</div>
+          <div class="slider-row"><div class="slider-head"><span>😰 Mi nivel de estrés hoy</span><span class="slider-val" id="v-estres">3</span></div><input type="range" min="1" max="5" value="3" id="s-estres" oninput="upd(this,'v-estres')"></div>
+          <div class="slider-row"><div class="slider-head"><span>💪 Sensación de control</span><span class="slider-val" id="v-ctrl">3</span></div><input type="range" min="1" max="5" value="3" id="s-ctrl" oninput="upd(this,'v-ctrl')"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-sec" onclick="goDS(1)">← Atrás</button>
+          <button class="btn-primary" style="flex:1" onclick="runAnalysis()">🔍 Analizar aula</button>
+        </div>
       </div>
-      <div class="stu-field">
-        <label>Tu nombre</label>
-        <input type="text" id="stu-name-inp" class="stu-name-input" placeholder="Escribe tu nombre" maxlength="20"/>
-      </div>
-      <div class="stu-error" id="stu-error">Código incorrecto. Comprueba la pantalla del profesor.</div>
-      <button class="btn btn-or" style="width:100%;padding:15px;font-size:15px;margin-top:8px;border-radius:var(--r-sm)" onclick="studentJoin()">Entrar →</button>
-      <div style="margin-top:16px;font-size:12px;color:#9ca3af;text-align:center">
-        ¿Eres profesor? <span style="cursor:pointer;color:var(--or);font-weight:700" onclick="showScreen('s-login')">Accede aquí</span>
+
+      <!-- STEP 3: OUTPUT -->
+      <div class="diag-step" id="ds3">
+        <div class="steps">
+          <div class="step-dot done">✓</div>
+          <div class="step-line done"></div>
+          <div class="step-dot done">✓</div>
+          <div class="step-line done"></div>
+          <div class="step-dot active">3</div>
+        </div>
+        <div class="diag-hero fade-in">
+          <p class="diag-hero-eyebrow">Problema principal detectado</p>
+          <p class="diag-hero-title" id="dh-title">—</p>
+          <p class="diag-hero-desc" id="dh-desc">—</p>
+        </div>
+        <div class="card fade-in">
+          <p class="card-title">Resumen del diagnóstico</p>
+          <div id="diag-thermo-row" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <span id="diag-thermo-val" style="font-size:14px;color:var(--slate-mid)">—</span>
+          </div>
+          <div class="sec-label" style="margin-top:0">Indicadores con mayor impacto</div>
+          <div id="indicators-list" style="display:flex;flex-direction:column;gap:10px;margin-top:6px"></div>
+        </div>
+        <div class="alert-strip alert-info fade-in">
+          <span>💡</span>
+          <span>Ve a <strong>Intervención</strong> para elegir el problema a trabajar y ver estrategias concretas para tu aula.</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-sec" onclick="goDS(1)">Repetir diagnóstico</button>
+          <button class="btn-primary" style="flex:1" onclick="switchTab('interv')">Ver intervenciones →</button>
+        </div>
       </div>
     </div>
+
+    <!-- ── TAB 2: INTERVENCIÓN ── -->
+    <div class="tab-pane" id="tab-interv">
+      <div id="iv-no-diag" style="display:none">
+        <div class="empty" style="padding-top:60px">
+          <div class="e-icon">🔍</div>
+          <p class="e-title">Primero haz un diagnóstico</p>
+          <p class="e-sub">Completa el diagnóstico en la pestaña anterior para ver las intervenciones recomendadas.</p>
+          <button class="btn-primary" style="max-width:240px;margin:20px auto 0" onclick="switchTab('diag')">Ir al diagnóstico →</button>
+        </div>
+      </div>
+      <div id="iv-content" style="display:none">
+        <p class="page-title">Selecciona el problema</p>
+        <p class="page-sub">Elige el reto que quieres trabajar hoy</p>
+        <div class="card">
+          <p class="card-title">Problema principal</p>
+          <p class="card-sub" style="margin-bottom:10px">Detectado en tu diagnóstico</p>
+          <div class="pchips" id="main-chip"></div>
+        </div>
+        <div class="card">
+          <p class="card-title">Otros problemas identificados</p>
+          <p class="card-sub" style="margin-bottom:10px">También puedes trabajar estos</p>
+          <div class="pchips" id="sec-chips"></div>
+        </div>
+        <div id="iv-cards"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB 3: CHECK-IN ── -->
+    <div class="tab-pane" id="tab-checkin">
+      <div id="ci-hist" style="display:none">
+        <p class="page-title">Registro de sesiones</p>
+        <p class="page-sub">Historial de intervenciones aplicadas</p>
+        <div id="hist-list" style="margin-bottom:20px"></div>
+        <div class="divider"></div>
+      </div>
+      <div id="ci-no-interv" style="display:none">
+        <div class="empty" style="padding-top:30px">
+          <div class="e-icon">🎯</div>
+          <p class="e-title">Sin intervención activa</p>
+          <p class="e-sub">Aplica una intervención primero para registrar el resultado aquí.</p>
+          <button class="btn-primary" style="max-width:240px;margin:20px auto 0" onclick="switchTab('interv')">Ver intervenciones →</button>
+        </div>
+      </div>
+      <div id="ci-form" style="display:none">
+        <div class="alert-strip alert-info" id="ci-interv-label"></div>
+        <div class="card">
+          <p class="card-title">¿Aplicaste la intervención?</p>
+          <div class="radio-row" style="margin-top:10px">
+            <div class="radio-pill"><input type="radio" name="applied" id="a-si" value="si"><label for="a-si">✅ Sí, la apliqué</label></div>
+            <div class="radio-pill"><input type="radio" name="applied" id="a-no" value="no"><label for="a-no">❌ No pude</label></div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="card-title">¿Qué pasó?</p>
+          <div class="emoji-grid" style="margin-top:10px">
+            <button class="e-btn" data-val="mucho" onclick="pickEmoji(this)"><span class="e-emoji">🚀</span><span class="e-label">Mejoró mucho</span></button>
+            <button class="e-btn" data-val="algo" onclick="pickEmoji(this)"><span class="e-emoji">📈</span><span class="e-label">Mejoró algo</span></button>
+            <button class="e-btn" data-val="igual" onclick="pickEmoji(this)"><span class="e-emoji">➡️</span><span class="e-label">Sin cambios</span></button>
+            <button class="e-btn" data-val="peor" onclick="pickEmoji(this)"><span class="e-emoji">📉</span><span class="e-label">Empeoró</span></button>
+          </div>
+        </div>
+        <div class="card">
+          <p class="card-title">¿Qué observaste?</p>
+          <p class="card-sub" style="margin-bottom:10px">Marca todo lo que aplicó</p>
+          <div class="obs-chips">
+            <button class="obs-chip" onclick="toggleObs(this)">🔉 Menos ruido</button>
+            <button class="obs-chip" onclick="toggleObs(this)">👀 Más atención</button>
+            <button class="obs-chip" onclick="toggleObs(this)">😊 Mejor ambiente</button>
+            <button class="obs-chip" onclick="toggleObs(this)">🤔 Más preguntas</button>
+            <button class="obs-chip" onclick="toggleObs(this)">🙅 Resistencia</button>
+            <button class="obs-chip" onclick="toggleObs(this)">⚡ Conflicto puntual</button>
+          </div>
+        </div>
+        <div class="card">
+          <p class="card-title" style="margin-bottom:14px">Feedback libre</p>
+          <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:6px">¿Qué te ha funcionado?</label>
+          <textarea class="ta" id="fb-worked" placeholder="Escribe aquí aunque sea una sola cosa..."></textarea>
+          <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin:14px 0 6px">¿Qué mejorarías?</label>
+          <textarea class="ta" id="fb-improve" placeholder="¿Cambiarías algo de la intervención?"></textarea>
+        </div>
+        <button class="btn-primary" onclick="submitFeedback()">📤 Guardar registro</button>
+      </div>
+      <div id="ci-initial">
+        <div class="empty" style="padding-top:60px">
+          <div class="e-icon">📝</div>
+          <p class="e-title">Aquí aparecerá tu registro</p>
+          <p class="e-sub">Cuando apliques una intervención,<br>podrás registrar el resultado aquí.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
-  <!-- Waiting room -->
-  <div class="stu-waiting" id="stu-waiting">
-    <div class="sw-icon">🎮</div>
-    <div class="sw-code-badge" id="sw-code-badge">Código: —</div>
-    <div class="sw-name" id="sw-name">—</div>
-    <div class="sw-status">Esperando a que el profesor inicie la actividad...</div>
-    <div class="sw-dots"><div class="sw-dot"></div><div class="sw-dot"></div><div class="sw-dot"></div></div>
-  </div>
-  <!-- Answering -->
-  <div class="stu-answer" id="stu-answer"></div>
-  <!-- Answered feedback -->
-  <div class="stu-answered" id="stu-answered"></div>
-</section>
+</div>
+
+<!-- SUCCESS -->
+<div id="success-overlay">
+  <div class="suc-icon">🎉</div>
+  <h1 class="suc-title">¡Registro guardado!</h1>
+  <p class="suc-sub">Gracias por tu feedback.<br>Tu experiencia mejora Klaizen para todos los docentes.</p>
+  <button class="btn-primary" style="max-width:280px" onclick="closeSuccess()">Volver al inicio</button>
+</div>
 
 <script>
-/* ═══════════════════════════════════════
-   DATA
-═══════════════════════════════════════ */
-const GROUPS=[
-  {id:'3eso-b',name:'3º ESO B',subject:'Ciencias Sociales',students:24,center:'IES Valle Verde',
-   indicators:[{name:'Motivación',val:0},{name:'Bienestar',val:0},{name:'Pertenencia',val:0},{name:'Autoconfianza',val:0},{name:'Relaciones',val:0},{name:'Estrés',val:0}],
-   chartPts:[],evalDone:false,socioDone:false},
-  {id:'4eso-a',name:'4º ESO A',subject:'Geografía e Historia',students:22,center:'IES Valle Verde',
-   indicators:[{name:'Motivación',val:0},{name:'Bienestar',val:0},{name:'Pertenencia',val:0},{name:'Autoconfianza',val:0},{name:'Relaciones',val:0},{name:'Estrés',val:0}],
-   chartPts:[],evalDone:false,socioDone:false},
-  {id:'1bach-b',name:'1º Bach B',subject:'Historia Contemporánea',students:28,center:'IES Valle Verde',
-   indicators:[{name:'Motivación',val:0},{name:'Bienestar',val:0},{name:'Pertenencia',val:0},{name:'Autoconfianza',val:0},{name:'Relaciones',val:0},{name:'Estrés',val:0}],
-   chartPts:[],evalDone:false,socioDone:false}
-];
+// ═══════════ STATE ═══════════
+const ST={user:'',thermo:null,diagDone:false,diagData:null,problems:[],selProblem:null,selInterv:null,emojiPick:null,history:[]};
+function save(){try{localStorage.setItem('klz3',JSON.stringify(ST))}catch(e){}}
+function load(){try{const d=localStorage.getItem('klz3');if(d)Object.assign(ST,JSON.parse(d))}catch(e){}}
 
-const STUDENTS_LIST=['Sofía','Lucas','Martina','Pablo','Valeria','Alejandro','Carmen','Diego','Alba','Javier'];
-const AV_COLORS=['#dc2626','#d97706','#16a34a','#2563eb','#9333ea','#db2777','#0891b2','#65a30d','#ea580c','#7c3aed'];
-
-const FLOWS={
-  eval:{name:'Evaluación del grupo',steps:[
-    {type:'intro',icon:'📋',q:'Evaluación emocional del grupo',hint:'Vamos a conocer cómo se siente el grupo hoy. Responde con sinceridad, es anónimo.'},
-    {type:'scale',q:'¿Cómo te sientes hoy en clase?',emojis:['😔','😐','🙂','😊','🤩'],labels:['Mal','Regular','Normal','Bien','Genial']},
-    {type:'k4',q:'¿Qué describe mejor tu motivación esta semana?',opts:['🔥 Muy motivado/a','🙂 Bastante bien','😐 Regular, tirando','😴 Sin energía']},
-    {type:'scale',q:'¿Sientes que perteneces a este grupo?',emojis:['😞','😕','😐','😊','🥰'],labels:['Nada','Poco','Regular','Sí','Mucho']},
-    {type:'text',q:'¿Qué mejorarías del ambiente en clase?',ph:'Escribe tu opinión libremente...'},
-    {type:'result',evalResult:true}
-  ]},
-  socio:{name:'Sociograma',steps:[
-    {type:'intro',icon:'🕸️',q:'Sociograma del aula',hint:'Este ejercicio nos ayuda a entender las relaciones del grupo. Todo es anónimo y confidencial.'},
-    {type:'socio',q:'¿Con quién trabajarías en un proyecto importante?',hint:'Elige hasta 3 compañeros',max:3},
-    {type:'socio',q:'¿A quién pedirías ayuda si tuvieras un problema?',hint:'Elige hasta 2 compañeros',max:2},
-    {type:'k4',q:'¿Cómo valoras el trabajo en equipo en tu clase?',opts:['⭐⭐⭐⭐⭐ Excelente','⭐⭐⭐⭐ Muy bien','⭐⭐⭐ Regular','⭐⭐ Mejorable']},
-    {type:'result',socioResult:true}
-  ]},
-  reconect:{name:'Reconectar el grupo',steps:[
-    {type:'intro',icon:'🤝',q:'Actividad: Reconectar el grupo',hint:'Vamos a fortalecer los lazos del grupo con dinámicas positivas.'},
-    {type:'scale',q:'¿Cómo sientes la unidad del grupo hoy?',emojis:['💔','😐','🙂','😊','💪'],labels:['Divididos','Distantes','Normal','Unidos','Muy unidos']},
-    {type:'k4',q:'¿Qué cohesiona más a tu clase?',opts:['🎉 Actividades juntos','💬 Hablar más','🤝 Ayudarnos más','🎯 Objetivos comunes']},
-    {type:'text',q:'Escribe algo positivo que aporte al grupo',ph:'Una fortaleza del equipo...'},
-    {type:'result'}
-  ]},
-  motivacion:{name:'Mejorar motivación',steps:[
-    {type:'intro',icon:'⚡',q:'Actividad: Mejorar la motivación',hint:'Dinámicas para despertar la motivación intrínseca del grupo.'},
-    {type:'k4',q:'¿Qué te motiva más en clase?',opts:['🧠 Aprender cosas nuevas','👥 Trabajos en grupo','💪 Retos difíciles','🎨 Libertad de crear']},
-    {type:'text',q:'¿Qué tipo de actividades te gustaría hacer más?',ph:'Describe qué te gustaría...'},
-    {type:'scale',q:'¿Cómo está tu energía hoy en clase?',emojis:['😴','😐','🙂','😊','🤩'],labels:['Sin energía','Poca','Normal','Bien','Al máximo']},
-    {type:'result'}
-  ]},
-  confianza:{name:'Dinámica de confianza',steps:[
-    {type:'intro',icon:'💬',q:'Dinámica de confianza',hint:'Fortalecemos los vínculos y la confianza dentro del grupo.'},
-    {type:'text',q:'Escribe algo positivo sobre un compañero/a',ph:'Puede ser algo pequeño, pero genuino...'},
-    {type:'k4',q:'¿Qué fortalece más la confianza en tu clase?',opts:['✅ Ser honesto','🤝 Cumplir promesas','👂 Escuchar sin juzgar','🆘 Pedir ayuda sin miedo']},
-    {type:'scale',q:'¿Cómo sientes la confianza en el grupo?',emojis:['😞','😐','🙂','😊','🤩'],labels:['Nula','Poca','Regular','Buena','Muy alta']},
-    {type:'result'}
-  ]}
-};
-
-/* ═══════════════════════════════════════
-   APP STATE
-═══════════════════════════════════════ */
-const S={
-  group:null,
-  currentFlowId:null,
-  currentStep:0,
-  steps:[],
-  sessionCode:'',
-  joinedStudents:[],
-  totalSteps:0,
-  timerInterval:null,
-  respInterval:null,
-  studentName:'',
-  studentColor:'',
-  activityStarted:false,
-  showingResults:false
-};
-
-/* ═══════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════ */
-function showScreen(id){
+// ═══════════ LOGIN ═══════════
+function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  if(!email){alert('Introduce tu correo');return}
+  ST.user=email;save();
+  document.getElementById('user-chip').textContent=email.split('@')[0];
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+  document.getElementById('s-app').classList.add('active');
+  initApp();
 }
-function backToGroups(){clearIntervals();showScreen('s-groups');renderGroupsGrid()}
-function backToMain(){clearIntervals();showScreen('s-main');renderDash()}
-function endActivity(){clearIntervals();backToMain()}
-function clearIntervals(){clearInterval(S.timerInterval);clearInterval(S.respInterval);S.timerInterval=null;S.respInterval=null}
-
-/* ═══════════════════════════════════════
-   TEACHER LOGIN
-═══════════════════════════════════════ */
-function teacherLogin(){
-  showScreen('s-groups');
-  renderGroupsGrid();
+function doLogout(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-login').classList.add('active');
 }
 
-/* ═══════════════════════════════════════
-   GROUP SELECTOR
-═══════════════════════════════════════ */
-function renderGroupsGrid(){
-  const grid=document.getElementById('groups-grid');
-  grid.innerHTML=GROUPS.map(g=>{
-    const hasData=g.evalDone;
-    const avg=hasData?Math.round(g.indicators.reduce((a,i)=>a+i.val,0)/g.indicators.length):null;
-    const cls=avg===null?'w':avg<50?'warn':avg<70?'warn':'ok';
-    const both=g.evalDone&&g.socioDone;
-    const scoreHtml=hasData
-      ? `<div class="g-sv ${cls}">${avg}<span style="font-size:11px;opacity:.5"> /100</span></div>`
-      : `<div class="g-sv" style="color:rgba(255,255,255,.25);font-size:14px">— Sin datos</div>`;
-    return `<div class="g-tile" onclick="selectGroup('${g.id}')">
-      <div class="g-subj">${g.subject}</div>
-      <div class="g-name">${g.name}</div>
-      <div class="g-meta">${g.center} · ${g.students} alumnos</div>
-      <div class="g-stats">
-        <div>${scoreHtml}<div class="g-sl">Klaizen Score</div></div>
-        <div><div class="g-sv" style="color:${both?'#4ade80':hasData?'#fbbf24':'rgba(255,255,255,.25)'};font-size:14px">${both?'✓ Completado':hasData?'Pendiente':'— Sin actividad'}</div><div class="g-sl">Diagnóstico</div></div>
-      </div>
-      <div class="g-arrow">→</div>
-    </div>`;
-  }).join('');
+// ═══════════ TABS ═══════════
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('btn-t-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  document.querySelector('.tab-content').scrollTo(0,0);
+  if(t==='interv')renderInterv();
+  if(t==='checkin')renderCheckin();
 }
-function selectGroup(id){S.group=GROUPS.find(g=>g.id===id);showScreen('s-main');renderDash()}
 
-/* ═══════════════════════════════════════
-   DASHBOARD
-═══════════════════════════════════════ */
-function renderDash(){
-  const g=S.group;
-  document.getElementById('tb-cur-group').textContent=g.name;
-  document.getElementById('dash-gname').textContent=g.name;
-  document.getElementById('dash-gsub').textContent=g.center+' · '+g.students+' alumnos';
-  document.getElementById('dash-gsubj').textContent=g.subject;
-  renderIndicators(g);renderChart(g);renderActivities(g);
-  const both=g.evalDone&&g.socioDone;
-  // Show no-diag banner until BOTH are done; hide when complete
-  document.getElementById('no-diag').style.display=both?'none':'flex';
-  document.getElementById('diag-blk').classList.toggle('on',both);
-  // Update no-diag message depending on state
-  const noD=document.getElementById('no-diag');
-  if(!g.evalDone){
-    noD.querySelector('.no-diag-txt').innerHTML='<strong>Este grupo aún no tiene ningún dato.</strong><br>Lanza la <strong>Evaluación</strong> para empezar a recoger información del grupo.';
-  } else if(!g.socioDone){
-    noD.querySelector('.no-diag-txt').innerHTML='<strong>Evaluación completada.</strong><br>Ahora lanza el <strong>Sociograma</strong> para obtener el diagnóstico completo del grupo.';
-  }
+// ═══════════ INIT ═══════════
+function initApp(){
+  initSliders();
+  if(ST.diagDone){showDiagResult();goDS(3,true)}
+  renderNotifs();
 }
-function renderIndicators(g){
-  const grid=document.getElementById('ind-grid');
-  const hasData=g.evalDone;
-  grid.innerHTML=g.indicators.map(ind=>{
-    if(!hasData){
-      return `<div class="ind-item" style="border-left:3px solid rgba(255,255,255,.08)">
-        <div class="ind-top"><span class="ind-n">${ind.name}</span><span class="ind-v" style="color:var(--muted);font-size:16px">—</span></div>
-        <div class="ind-bar"><div class="ind-fill" style="width:0%;background:var(--muted)"></div></div>
-      </div>`;
-    }
-    const cls=ind.val<50?'low':ind.val<70?'med':'high';
-    return `<div class="ind-item ${cls}">
-      <div class="ind-top"><span class="ind-n">${ind.name}</span><span class="ind-v ${cls}">${ind.val}<span class="den">/100</span></span></div>
-      <div class="ind-bar"><div class="ind-fill ${cls}" style="width:0%" data-w="${ind.val}%"></div></div>
-    </div>`;
-  }).join('');
-  if(hasData) requestAnimationFrame(()=>setTimeout(()=>{grid.querySelectorAll('.ind-fill').forEach(el=>el.style.width=el.dataset.w)},80));
+function initSliders(){document.querySelectorAll('input[type=range]').forEach(setSB)}
+function setSB(el){const p=(el.value-1)/4*100;el.style.background=`linear-gradient(to right,var(--orange) ${p}%,var(--orange) ${p}%,#E2E8F0 ${p}%,#E2E8F0 100%)`}
+function upd(el,vid){document.getElementById(vid).textContent=el.value;setSB(el)}
+
+// ═══════════ THERMO ═══════════
+function pickThermo(el,s){document.querySelectorAll('.thermo-item').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');ST.thermo=s}
+
+// ═══════════ DIAG STEPS ═══════════
+function goDS(n,silent){
+  document.querySelectorAll('.diag-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ds'+n).classList.add('active');
+  if(!silent)document.querySelector('.tab-content').scrollTo(0,0);
 }
-function renderChart(g){
-  const svg=document.getElementById('chart-svg');
-  const pts=g.chartPts;
-  if(!pts||pts.length===0){
-    svg.innerHTML=`<text x="300" y="50" text-anchor="middle" font-size="13" fill="rgba(0,0,0,.2)" font-family="Plus Jakarta Sans" font-weight="600">Sin datos aún — completa la primera evaluación</text>`;
-    return;
-  }
-  const W=600,H=90,px=8,py=10;
-  const xs=pts.map((_,i)=>px+i*(W-px*2)/(pts.length===1?1:pts.length-1));
-  const ys=pts.map(v=>H-py-(v/100)*(H-py*2));
-  let d=pts.length===1?`M ${xs[0]} ${ys[0]}`:`M ${xs[0]} ${ys[0]}`;
-  for(let i=1;i<pts.length;i++){const cpx=(xs[i-1]+xs[i])/2;d+=` C ${cpx} ${ys[i-1]}, ${cpx} ${ys[i]}, ${xs[i]} ${ys[i]}`}
-  const fill=pts.length>1?d+` L ${xs[xs.length-1]} ${H} L ${xs[0]} ${H} Z`:d;
-  svg.innerHTML=`<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f36a15" stop-opacity=".14"/><stop offset="100%" stop-color="#f36a15" stop-opacity="0"/></linearGradient></defs>
-    ${pts.length>1?`<path d="${fill}" fill="url(#cg)"/>`:''}
-    <path d="${d}" fill="none" stroke="#f36a15" stroke-width="2.5" stroke-linecap="round"/>
-    ${pts.map((v,i)=>`<circle cx="${xs[i]}" cy="${ys[i]}" r="5" fill="#f36a15"/>`).join('')}
-    ${pts.map((v,i)=>`<text x="${xs[i]}" y="${ys[i]-10}" text-anchor="middle" font-size="10" fill="#f36a15" font-family="Plus Jakarta Sans" font-weight="700">${v}</text>`).join('')}`;
-}
-function renderActivities(g){
-  const both=g.evalDone&&g.socioDone;
-  const bl={done:'✓ Completado',open:'Iniciar',new:'⭐ Recomendada',locked:'🔒 Bloqueado'};
-  const acts=[
-    {icon:'📋',icls:'or',name:'Evaluación',desc:'Mide el estado emocional y motivacional del grupo',status:g.evalDone?'done':'open',locked:false,fid:'eval'},
-    {icon:'🕸️',icls:'bl',name:'Sociograma',desc:'Analiza relaciones y conexiones entre alumnos',status:g.socioDone?'done':'open',locked:false,fid:'socio'},
-    {icon:'🤝',icls:'gr',name:'Reconectar el grupo',desc:'Actividad de cohesión y confianza grupal',status:both?'new':'locked',locked:!both,fid:'reconect'},
-    {icon:'⚡',icls:'gr',name:'Mejorar motivación',desc:'Dinámicas para activar la motivación intrínseca',status:both?'open':'locked',locked:!both,fid:'motivacion'},
-    {icon:'💬',icls:'gr',name:'Dinámica de confianza',desc:'Ejercicios para fortalecer vínculos en el aula',status:both?'open':'locked',locked:!both,fid:'confianza'},
+
+// ═══════════ ANALYSIS ═══════════
+const DESCS={
+  interrupciones:'El aula presenta interrupciones frecuentes que fragmentan el ritmo de aprendizaje y dificultan la concentración.',
+  apatia:'El grupo muestra desconexión y falta de motivación hacia las tareas propuestas.',
+  conflictos:'Hay tensiones entre alumnos que deterioran el ambiente de trabajo colectivo.',
+  desafiantes:'Uno o varios alumnos desafían de forma sistemática las normas del aula.',
+  cohesion:'El grupo no funciona como equipo; hay fricciones y falta de sentido de pertenencia.',
+  ansiedad:'Se percibe nerviosismo o ansiedad que bloquea el aprendizaje y la participación.',
+  fatiga:'El nivel de estrés docente está impactando en la gestión y el clima del aula.',
+};
+
+function runAnalysis(){
+  const r=+document.getElementById('s-ruido').value,i=+document.getElementById('s-inter').value,
+        a=+document.getElementById('s-aten').value,c=+document.getElementById('s-conf').value,
+        re=+document.getElementById('s-resp').value,im=+document.getElementById('s-impul').value,
+        fr=+document.getElementById('s-frus').value,au=+document.getElementById('s-auto').value,
+        es=+document.getElementById('s-estres').value,ct=+document.getElementById('s-ctrl').value;
+  const tutor=document.querySelector('input[name=tutor]:checked')?.value||'no';
+  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,tutor};
+  const raw=[
+    {key:'interrupciones',label:'Interrupciones constantes',emoji:'🙋',score:(r+i)/2},
+    {key:'apatia',label:'Apatía y baja atención',emoji:'😴',score:(5-a+5-au)/2},
+    {key:'conflictos',label:'Conflictos entre alumnos',emoji:'⚡',score:c},
+    {key:'desafiantes',label:'Alumnos desafiantes',emoji:'😠',score:(5-re+im)/2},
+    {key:'cohesion',label:'Baja cohesión grupal',emoji:'🧩',score:(c+5-re)/2},
+    {key:'ansiedad',label:'Ansiedad grupal',emoji:'😰',score:(fr+es)/2},
+    {key:'fatiga',label:'Fatiga docente',emoji:'😓',score:es},
   ];
-  document.getElementById('acts-list').innerHTML=acts.map(a=>`
-    <div class="act ${a.locked?'locked':''}" onclick="${a.locked?'void 0':`openLobby('${a.fid}')`}">
-      <div class="act-ico ${a.icls}">${a.icon}</div>
-      <div class="act-inf"><div class="act-nm">${a.name}</div><div class="act-ds">${a.desc}</div></div>
-      ${!a.locked?`<button class="act-launch" onclick="event.stopPropagation();openLobby('${a.fid}')">👉 Lanzar actividad</button>`:`<span class="badge ${a.status}">${bl[a.status]}</span>`}
-    </div>`).join('');
+  raw.sort((a,b)=>b.score-a.score);
+  ST.problems=raw;ST.diagDone=true;ST.selProblem=null;ST.selInterv=null;save();
+  showDiagResult();renderNotifs();goDS(3);
 }
 
-/* ═══════════════════════════════════════
-   LOBBY
-═══════════════════════════════════════ */
-function generateCode(){
-  // Generate 5-digit numeric code (easy for students)
-  return String(Math.floor(10000+Math.random()*90000));
-}
-
-function openLobby(flowId){
-  S.currentFlowId=flowId;
-  S.steps=FLOWS[flowId].steps;
-  S.totalSteps=S.steps.length;
-  S.sessionCode=generateCode();
-  S.joinedStudents=[];
-  S.activityStarted=false;
-  S.showingResults=false;
-
-  document.getElementById('lobby-act-name').textContent=FLOWS[flowId].name;
-  document.getElementById('lobby-code').textContent=S.sessionCode;
-  renderLobbyStudents();
-
-  showScreen('s-lobby');
-  simulateStudentsJoining();
-}
-
-function simulateStudentsJoining(){
-  const names=['Sofía','Lucas','Martina','Pablo','Valeria','Alejandro','Carmen','Diego','Alba','Javier','María','Óscar'];
-  let i=0;
-  S.respInterval=setInterval(()=>{
-    if(i>=names.length||S.activityStarted){clearInterval(S.respInterval);return}
-    const color=AV_COLORS[i%AV_COLORS.length];
-    S.joinedStudents.push({name:names[i],color,initials:names[i].charAt(0)});
-    renderLobbyStudents();
-    i++;
-  },1400);
-}
-
-function renderLobbyStudents(){
-  const n=S.joinedStudents.length;
-  document.getElementById('ls-count-n').textContent=n;
-  const av=document.getElementById('ls-avatars');
-  if(n===0){av.innerHTML='<div class="ls-waiting">Esperando conexiones...</div>';return}
-  av.innerHTML=S.joinedStudents.map((s,i)=>`
-    <div class="ls-av" style="animation-delay:${i*.05}s">
-      <div class="ls-av-circle" style="background:${s.color}">${s.initials}</div>
-      <div class="ls-av-name">${s.name}</div>
-    </div>`).join('');
-  const btn=document.getElementById('lobby-start-btn');
-  btn.disabled=n<1;
-}
-
-/* ═══════════════════════════════════════
-   BEGIN ACTIVITY
-═══════════════════════════════════════ */
-function beginActivity(){
-  clearInterval(S.respInterval);
-  S.activityStarted=true;
-  S.currentStep=0;
-  document.getElementById('proj-act-name').textContent=FLOWS[S.currentFlowId].name;
-  showScreen('s-activity');
-  renderStep();
-  // If student screen was waiting, update it
-  updateStudentView();
-}
-
-/* ═══════════════════════════════════════
-   PROJECTION STEP RENDERER (teacher read-only)
-═══════════════════════════════════════ */
-function renderStep(){
-  const s=S.steps[S.currentStep];
-  const total=S.totalSteps;
-  const pct=(S.currentStep/(total-1))*100;
-  document.getElementById('prog-in').style.width=pct+'%';
-  document.getElementById('prog-lbl').textContent=`Paso ${S.currentStep+1} de ${total}`;
-  const body=document.getElementById('flow-body');
-  body.innerHTML='';
-  const div=document.createElement('div');
-  div.className='step active';
-  div.innerHTML=buildProjectionStep(s);
-  body.appendChild(div);
-  window.scrollTo(0,0);
-  if(s.type==='result') setTimeout(animateRings,300);
-  else if(s.type!=='intro') startResponseSimulation(s);
-}
-
-function buildProjectionStep(s){
-  const n=S.currentStep+1,tot=S.totalSteps;
-  const joined=S.joinedStudents.length;
-
-  if(s.type==='intro') return `
-    <div class="intro-card">
-      <span class="intro-icon">${s.icon}</span>
-      <div class="intro-step-n">Paso ${n} de ${tot}</div>
-      <div class="intro-q">${s.q}</div>
-      <div class="intro-hint">${s.hint}</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-        <div class="live-count" style="margin-bottom:0"><div class="lc-dot"></div>${joined} alumnos conectados</div>
-        <div style="background:rgba(255,106,0,.15);border:1px solid rgba(255,106,0,.3);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:800;color:var(--or)">Código: ${S.sessionCode}</div>
-      </div>
-      <button class="btn btn-or btn-proj" onclick="nextProjStep()">Empezar →</button>
-    </div>`;
-
-  if(s.type==='k4'){
-    const cc=['c0','c1','c2','c3'],nn=['A','B','C','D'];
-    // Show read-only options — teacher doesn't interact
-    return `<div class="q-card">
-      <div class="q-step-n">Pregunta ${n} de ${tot}</div>
-      <div class="q-txt">${s.q}</div>
-      <div class="k-grid">${s.opts.map((o,i)=>`<div class="k-btn ${cc[i]}"><span class="k-num">${nn[i]}</span>${o}</div>`).join('')}</div>
-      ${respBar(joined)}
-      <button class="btn btn-or btn-proj" onclick="showResultsThenNext()">Ver resultados →</button>
-    </div>`;}
-
-  if(s.type==='scale') return `<div class="q-card" style="text-align:center">
-    <div class="q-step-n">Pregunta ${n} de ${tot}</div>
-    <div class="scale-q">${s.q}</div>
-    <div class="scale-row">${s.emojis.map((e,i)=>`<div class="scale-disp"><span class="se">${e}</span><span class="sl">${s.labels[i]}</span></div>`).join('')}</div>
-    ${respBar(joined)}
-    <button class="btn btn-or btn-proj" onclick="showResultsThenNext()">Ver resultados →</button>
-  </div>`;
-
-  if(s.type==='text') return `<div class="q-card" style="text-align:center">
-    <div class="q-step-n">Pregunta ${n} de ${tot}</div>
-    <div class="t-q">${s.q}</div>
-    <div class="t-placeholder">✏️ Los alumnos están escribiendo en sus dispositivos...</div>
-    ${respBar(joined)}
-    <button class="btn btn-or btn-proj" onclick="nextProjStep()">Siguiente →</button>
-  </div>`;
-
-  if(s.type==='socio') return `<div class="q-card">
-    <div class="q-step-n">Pregunta ${n} de ${tot}</div>
-    <div class="socio-q">${s.q}</div>
-    <div class="socio-hint">${s.hint}</div>
-    <div class="socio-disp">${STUDENTS_LIST.map((st,i)=>`<div class="socio-chip"><div class="socio-chip-av" style="background:${AV_COLORS[i]}">${st.charAt(0)}</div>${st}</div>`).join('')}</div>
-    <div style="height:16px"></div>
-    ${respBar(joined)}
-    <button class="btn btn-or btn-proj" style="margin-top:16px" onclick="nextProjStep()">Siguiente →</button>
-  </div>`;
-
-  if(s.type==='result'){
-    const isE=s.evalResult,isS=s.socioResult;
-    return `<div class="res-wrap">
-      <div class="res-badge">${isE?'📋 Evaluación':isS?'🕸️ Sociograma':'✅ Actividad'} completada</div>
-      <div class="res-title">${isE?'¡Evaluación registrada!':isS?'¡Sociograma registrado!':'¡Actividad completada!'}</div>
-      <div class="thermo-row">
-        <div class="thermo-item"><div class="thermo-lbl">Antes</div>
-          <div class="thermo-ring"><svg viewBox="0 0 88 88"><circle class="ring-bg" cx="44" cy="44" r="36"/><circle class="ring-fill br" id="ring-b" cx="44" cy="44" r="36"/></svg><div class="thermo-pct b">52</div></div>
-          <div class="thermo-den">/ 100</div></div>
-        <div class="arr-big">→</div>
-        <div class="thermo-item"><div class="thermo-lbl">Ahora</div>
-          <div class="thermo-ring"><svg viewBox="0 0 88 88"><circle class="ring-bg" cx="44" cy="44" r="36"/><circle class="ring-fill ar" id="ring-a" cx="44" cy="44" r="36"/></svg><div class="thermo-pct a">61</div></div>
-          <div class="thermo-den">/ 100</div></div>
-      </div>
-      <div class="res-msg"><span style="font-size:20px">✅</span><span class="res-msg-t">Mejora detectada · +9 puntos de clima emocional</span></div>
-      <div class="res-acts">
-        <button class="btn btn-or btn-proj" onclick="completeFlow()">Finalizar actividad →</button>
-        <button class="btn btn-ghost btn-proj">Descargar informe</button>
-      </div>
-    </div>`;}
-  return '';
-}
-
-function respBar(joined){
-  return `<div class="resp-counter">
-    <span style="font-size:13px">Respuestas:</span>
-    <div class="rc-bar"><div class="rc-fill" id="rc-fill" style="width:0%"></div></div>
-    <span class="resp-count-n" id="rc-n">0</span>
-    <span style="font-size:13px;color:rgba(255,255,255,.35)">/ ${joined}</span>
-  </div>`;
-}
-
-function startResponseSimulation(s){
-  const total=S.joinedStudents.length;
-  let count=0;
-  clearInterval(S.timerInterval);
-  S.timerInterval=setInterval(()=>{
-    if(count>=total){clearInterval(S.timerInterval);return}
-    count+=Math.floor(Math.random()*2)+1;
-    count=Math.min(count,total);
-    const fill=document.getElementById('rc-fill');
-    const num=document.getElementById('rc-n');
-    if(fill) fill.style.width=(count/total*100)+'%';
-    if(num) num.textContent=count;
-  },800);
-}
-
-/* Show aggregated results before moving to next question */
-function showResultsThenNext(){
-  clearInterval(S.timerInterval);
-  const s=S.steps[S.currentStep];
-  const joined=S.joinedStudents.length;
-  const body=document.getElementById('flow-body');
-  const n=S.currentStep+1,tot=S.totalSteps;
-
-  let opts=[],colors=['#dc2626','#d97706','#2563eb','#16a34a'];
-  if(s.type==='k4') opts=s.opts.map((o,i)=>({label:o,color:colors[i]}));
-  if(s.type==='scale') opts=s.emojis.map((e,i)=>({label:e+' '+s.labels[i],color:'#ff6a00'}));
-
-  // Generate random realistic distribution
-  let vals=opts.map(()=>Math.floor(Math.random()*joined*0.8)+Math.floor(joined*0.1));
-  const sum=vals.reduce((a,b)=>a+b,0);
-  const maxV=Math.max(...vals);
-  const barColors=['#ff6a00','#2563eb','#16a34a','#9333ea','#d97706'];
-
-  const barsHtml=opts.map((o,i)=>{
-    const pct=sum>0?Math.round(vals[i]/sum*100):0;
-    const w=maxV>0?Math.round(vals[i]/maxV*100):0;
-    return `<div class="agg-row">
-      <div class="agg-label">${o.label}</div>
-      <div class="agg-bar-wrap"><div class="agg-bar-fill" style="width:0%;background:${barColors[i%barColors.length]}" data-w="${w}%">${vals[i]} resp.</div></div>
-      <div class="agg-pct">${pct}%</div>
-    </div>`;
+function showDiagResult(){
+  if(!ST.problems.length)return;
+  const m=ST.problems[0];
+  document.getElementById('dh-title').textContent=m.emoji+' '+m.label;
+  document.getElementById('dh-desc').textContent=DESCS[m.key];
+  const tl={caotic:'🔴 Caótico',unstable:'🟠 Inestable',improving:'🟡 Mejorando',stable:'🟢 Estable'};
+  document.getElementById('diag-thermo-val').textContent='Termómetro: '+(ST.thermo?tl[ST.thermo]:'No seleccionado');
+  const d=ST.diagData;if(!d)return;
+  const inds=[
+    {label:'Ruido',val:d.r,neg:true},{label:'Interrupciones',val:d.i,neg:true},
+    {label:'Atención',val:d.a,neg:false},{label:'Conflictos',val:d.c,neg:true},
+    {label:'Respeto',val:d.re,neg:false},{label:'Impulsividad',val:d.im,neg:true},
+    {label:'Estrés docente',val:d.es,neg:true},{label:'Control docente',val:d.ct,neg:false},
+  ];
+  inds.sort((a,b)=>{return(b.neg?b.val:5-b.val)-(a.neg?a.val:5-a.val)});
+  document.getElementById('indicators-list').innerHTML=inds.slice(0,4).map(ind=>{
+    const concern=ind.neg?ind.val>3:ind.val<3;
+    const col=concern?'var(--red)':ind.val===3?'var(--amber)':'var(--green)';
+    const bar=`<div style="flex:1;height:6px;background:#E8ECF2;border-radius:3px;overflow:hidden"><div style="width:${(ind.val/5)*100}%;height:100%;background:${col};border-radius:3px"></div></div>`;
+    return `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;width:140px;flex-shrink:0">${ind.label}</span>${bar}<span style="font-size:12px;font-weight:700;color:${col};width:28px;text-align:right">${ind.val}/5</span></div>`;
   }).join('');
-
-  body.innerHTML=`<div class="step active" style="text-align:center">
-    <div class="q-step-n" style="margin-bottom:20px">📊 Resultados · Pregunta ${n} de ${tot}</div>
-    <div class="q-txt" style="font-size:22px;margin-bottom:28px">${s.q}</div>
-    <div class="agg-bars">${barsHtml}</div>
-    <div class="resp-counter" style="margin-bottom:20px">
-      <span style="font-size:13px">Total respuestas:</span>
-      <span class="resp-count-n">${joined}</span>
-      <span style="font-size:13px;color:rgba(255,255,255,.35)">/ ${joined}</span>
-    </div>
-    <button class="btn btn-or btn-proj" onclick="nextProjStep()">Siguiente pregunta →</button>
-  </div>`;
-
-  // Animate bars
-  requestAnimationFrame(()=>setTimeout(()=>{
-    body.querySelectorAll('.agg-bar-fill').forEach(el=>el.style.width=el.dataset.w);
-  },80));
-  updateStudentView();
 }
 
-function nextProjStep(){
-  clearInterval(S.timerInterval);
-  if(S.currentStep<S.steps.length-1){
-    S.currentStep++;
-    renderStep();
-    updateStudentView();
+// ═══════════ NOTIFS ═══════════
+function renderNotifs(){
+  document.getElementById('nd-interv').style.display=ST.diagDone&&!ST.selProblem?'block':'none';
+  document.getElementById('nd-checkin').style.display=ST.selInterv?'block':'none';
+}
+
+// ═══════════ INTERVENTIONS DATA ═══════════
+const IV={
+  interrupciones:{
+    r:{title:'La señal de silencio',obj:'Restablecer el silencio en menos de 30 segundos sin levantar la voz.',pasos:['Para de hablar y levanta la mano abierta hacia la clase.','Espera en silencio. Los que te vean se callan y levantan también su mano.','Cuenta mentalmente hasta 10.','Agradece brevemente y continúa.'],script:'"Solo para y levanta la mano. El silencio hace el trabajo."'},
+    m:{title:'El semáforo de turno de palabra',obj:'Gestionar las intervenciones con un sistema visual claro y compartido.',pasos:['Explica: "Vamos a usar el semáforo de turno de palabra."','Rojo = nadie habla. Amarillo = levanta la mano. Verde = solo quien yo señale.','Practica 2 minutos con preguntas sencillas.','Refuerza positivamente cada vez que funcione.'],script:'"Cuando alguien interrumpa, señala el semáforo sin detenerte. Si insiste: \'Espero tu turno.\'"'},
+    p:{title:'Asamblea de normas de comunicación',obj:'Redefinir colectivamente las normas de comunicación del grupo.',pasos:['Abre espacio: "Necesitamos hablar de cómo nos comunicamos en clase."','Pregunta al grupo: ¿Qué normas necesitamos para que todos puedan aprender?','Recoge 3-5 propuestas y votad juntos.','Colgad el acuerdo en un lugar visible.','Revisad en 2 semanas.'],script:'"Este tiempo es para que decidáis cómo queréis que sea esta clase. Yo solo facilito. Vosotros decidís."'},
+  },
+  apatia:{
+    r:{title:'El reto de los 2 minutos',obj:'Activar al grupo con un desafío pequeño y concreto.',pasos:['Lanza un reto muy específico: "En 2 minutos, escribe 3 cosas que ya sabes sobre este tema."','Pon un temporizador visible.','Comparte 2-3 respuestas en voz alta.','Conecta con la lección del día.'],script:'"No pidas esfuerzo general. Pide una micro-tarea concreta. La acción rompe la apatía."'},
+    m:{title:'Aprendizaje entre pares',obj:'Crear responsabilidad compartida y activar la motivación intrínseca.',pasos:['Divide en parejas o tríos heterogéneos.','Asigna una micro-pregunta del tema a cada grupo.','3 minutos para preparar una explicación de 1 minuto.','Cada grupo explica al resto.','El docente refuerza y complementa.'],script:'"Vais a ser los expertos de vuestro punto. Vuestros compañeros aprenden de vosotros."'},
+    p:{title:'Proyecto de conexión con la vida real',obj:'Vincular el contenido a la vida real del alumno para generar motivación.',pasos:['Dedica 5 minutos a preguntar qué les preocupa, interesa o divierte.','Analiza los contenidos y conecta 3-4 puntos con sus intereses.','Diseña una actividad donde el contenido resuelve algo de su vida.','Presenta la conexión de forma explícita.','Evalúa la implicación al cabo de 1 semana.'],script:'"Hoy vamos a ver por qué esto tiene que ver con algo que vosotros ya vivís."'},
+  },
+  conflictos:{
+    r:{title:'Pausa y separación preventiva',obj:'Desactivar el conflicto antes de que escale.',pasos:['Identifica el foco del conflicto.','Con calma y sin dramatizar: "Necesito que os sentéis separados."','Continúa la clase como si nada.','Al terminar, habla brevemente con cada parte por separado.'],script:'"No preguntes qué pasó delante del grupo. Solo actúa: \'Aquí y aquí, por favor.\' Sin debate."'},
+    m:{title:'Círculo de escucha',obj:'Dar espacio a todas las partes para expresarse y buscar acuerdo.',pasos:['Siéntate con los implicados en círculo, sin mesa.','Regla: solo habla quien tiene el objeto.','Cada uno explica su versión sin interrupciones.','El docente parafrasea lo que escucha.','Proponed juntos una solución mínima viable.'],script:'"No busco quién tiene razón. Busco entender qué pasó y cómo lo arreglamos juntos."'},
+    p:{title:'Mediación entre iguales',obj:'Implementar un protocolo sostenible de resolución de conflictos.',pasos:['Presenta el rol de "mediador de aula" al grupo.','Forma a 3-4 alumnos con un protocolo básico.','Ante conflictos, activan el proceso antes de llegar al docente.','El tutor supervisa y valida los acuerdos.','Revisión mensual del funcionamiento.'],script:'"Vais a ser los responsables de ayudar a resolver los problemas del aula. Eso es una responsabilidad real."'},
+  },
+  desafiantes:{
+    r:{title:'Contacto visual + nombre',obj:'Redirigir el comportamiento sin confrontación pública.',pasos:['Cuando el alumno desafíe, mantén contacto visual 3 segundos.','Di su nombre en tono neutro.','Pausa.','Continúa con la clase.'],script:'"Solo el nombre. Sin regañinas. El silencio es más potente que cualquier discurso."'},
+    m:{title:'La conversación en privado',obj:'Entender qué hay detrás del comportamiento desafiante.',pasos:['Busca 3 minutos sin presión (recreo, antes de clase).','Pregunta: "¿Estás bien? ¿Hay algo que no te gusta?"','Escucha sin juzgar.','Ofrece un pequeño cambio real y posible.','Agradece que te lo haya contado.'],script:'"No vengo a regañarte. Vengo a entenderte."'},
+    p:{title:'Plan de conducta individualizado',obj:'Crear un acuerdo de comportamiento sostenible.',pasos:['Reúnete con el alumno y, si es posible, con la familia.','Identifica 2-3 comportamientos concretos a trabajar.','Define refuerzos positivos específicos.','Sistema de seguimiento semanal.','Revisión mensual y ajuste.'],script:'"Este plan no es un castigo. Es un acuerdo para que las cosas funcionen mejor para ti y para el grupo."'},
+  },
+  cohesion:{
+    r:{title:'La ronda de nombres positivos',obj:'Activar el sentido de pertenencia en 3 minutos.',pasos:['De pie en círculo o desde el sitio.','Cada alumno dice el nombre de la persona a su izquierda + algo positivo.','El docente empieza para modelar.'],script:'"Hoy empezamos con algo diferente. Quiero que os miréis."'},
+    m:{title:'Proyecto colaborativo exprés',obj:'Crear interdependencia positiva entre alumnos.',pasos:['Define un reto grupal con un producto visible.','Asigna roles: coordinador, redactor, buscador, presentador.','10 minutos de trabajo.','Presentación exprés.','Reflexión: ¿qué ha aportado cada uno?'],script:'"Esto solo funciona si cada uno hace su parte. El resultado es de todos."'},
+    p:{title:'Proyecto de conocimiento mutuo',obj:'Profundizar en el conocimiento entre alumnos para crear lazos reales.',pasos:['Actividad "quién soy yo" (foto, objeto, historia).','Cada alumno presenta 2 minutos.','El grupo hace preguntas respetuosas.','Mural del grupo visible en clase.','Repetir cada trimestre.'],script:'"Quiero que os conozcáis de verdad, no solo de estar en la misma clase."'},
+  },
+  ansiedad:{
+    r:{title:'Respiración 4-4-4',obj:'Bajar la activación del grupo en 90 segundos.',pasos:['Pide que se sienten rectos y bajen la mirada.','Inhala 4 seg, aguanta 4, exhala 4. Repetid 3 veces.','En tono tranquilo: "Ahora estamos aquí. No hay prisa."','Abre suavemente la actividad.'],script:'"Antes de empezar, un momento de calma. Seguidme." (sin pedir explicaciones)'},
+    m:{title:'El muro de preocupaciones',obj:'Externalizar preocupaciones para dejar espacio al aprendizaje.',pasos:['Reparte post-its.','Escribe algo que te preocupa (no tiene que ser de clase).','Los pegan en mural "aparcados por ahora".','Reconoce: "Estos están aquí. Los dejamos mientras trabajamos."','Al final: ¿alguien quiere comentar alguno?'],script:'"No voy a leer lo que escribís. Al dejarlo ahí, dejamos que la clase fluya."'},
+    p:{title:'Programa de regulación emocional',obj:'Desarrollar habilidades de autorregulación sostenidas.',pasos:['5 minutos al inicio de 2-3 clases/semana: respiración, body scan, journaling.','Introduce vocabulario emocional progresivamente.','Conecta con la materia.','Evalúa el clima emocional cada 2 semanas.'],script:'"Esto no es yoga. Es entrenar vuestra mente igual que entrenáis el cuerpo."'},
+  },
+  fatiga:{
+    r:{title:'El "solo esto"',obj:'Reducir la sobrecarga mental con foco radical.',pasos:['Antes de entrar al aula, identifica UNA sola cosa que quieres que pase hoy.','Escríbela.','Deja el resto como secundario.','Al salir: ¿pasó? Si sí, fue un buen día.'],script:'(Para ti) "Hoy mi único objetivo es que al menos 5 alumnos entiendan el concepto de X."'},
+    m:{title:'Check-in emocional propio',obj:'Conectar con tu estado antes de que afecte al aula.',pasos:['Llega 3 minutos antes.','Pregúntate: ¿Cómo estoy del 1 al 10?','Si <5: respiración 4-4-4, ajusta expectativas.','Si es necesario, comunícalo: "Hoy estoy cansado. Necesito vuestra colaboración."','Tras la clase: ¿qué me ha dado energía? ¿qué me ha quitado?'],script:'"Ser transparente contigo mismo es el primer paso."'},
+    p:{title:'Plan de autocuidado docente',obj:'Crear rutinas sostenibles que prevengan el burnout.',pasos:['Identifica tus 3 principales fuentes de estrés profesional.','Diseña una acción pequeña y realista por cada una.','Planifica 1 actividad de recarga semanal (no negociable).','Busca un compañero de referencia con quien compartir.','Revisión mensual.'],script:'"Cuidarme no es egoísta. Es lo que me permite seguir siendo un buen docente."'},
+  },
+};
+
+// ═══════════ RENDER INTERVENCIÓN ═══════════
+function renderInterv(){
+  if(!ST.diagDone){
+    document.getElementById('iv-no-diag').style.display='block';
+    document.getElementById('iv-content').style.display='none';return;
+  }
+  document.getElementById('iv-no-diag').style.display='none';
+  document.getElementById('iv-content').style.display='block';
+  const m=ST.problems[0];
+  document.getElementById('main-chip').innerHTML=
+    `<button class="pchip ${ST.selProblem?.key===m.key?'selected':''}" onclick="selProb('${m.key}','${m.label}')">${m.emoji} ${m.label}</button>`;
+  document.getElementById('sec-chips').innerHTML=ST.problems.slice(1,5).map(p=>
+    `<button class="pchip ${ST.selProblem?.key===p.key?'selected':''}" onclick="selProb('${p.key}','${p.label}')">${p.emoji} ${p.label}</button>`
+  ).join('');
+  if(ST.selProblem)renderCards(ST.selProblem.key);
+  else document.getElementById('iv-cards').innerHTML='<p style="font-size:13px;color:var(--slate-mid);text-align:center;margin-top:8px">Selecciona un problema para ver las intervenciones ↑</p>';
+}
+
+function selProb(key,label){
+  ST.selProblem={key,label};ST.selInterv=null;save();renderNotifs();
+  document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  renderCards(key);
+}
+
+function renderCards(key){
+  const data=IV[key]||IV['interrupciones'];
+  const tutor=ST.diagData?.tutor==='si';
+  const tipos=tutor?['r','m','p']:['r','m'];
+  const lbl={r:'⚡ Rápida · 1–3 min',m:'⏱️ Media · 5–10 min',p:'🔍 Profunda · Solo tutores'};
+  const bcls={r:'badge-r',m:'badge-m',p:'badge-p'};
+  document.getElementById('iv-cards').innerHTML=`
+    <p class="page-title" style="margin-top:10px;margin-bottom:4px">Intervenciones recomendadas</p>
+    <p class="page-sub">${ST.selProblem.label}</p>
+    ${tipos.map(t=>{
+      const d=data[t];const isApplied=ST.selInterv?.tipo===t&&ST.selInterv?.key===key;
+      return`<div class="interv-card ${t} ${isApplied?'applied-card':''} fade-in">
+        <span class="interv-badge ${bcls[t]}">${lbl[t]}</span>
+        <p class="interv-title">${d.title}</p>
+        <p class="interv-obj">🎯 ${d.obj}</p>
+        <ol class="steps-list">${d.pasos.map(p=>`<li>${p}</li>`).join('')}</ol>
+        <div class="script-box"><p class="script-eyebrow">Script docente</p><p class="script-text">${d.script}</p></div>
+        <button class="btn-apply ${isApplied?'applied':''}" onclick="applyIV('${t}','${key}','${d.title.replace(/'/g,"\\'")}')">${isApplied?'✅ Intervención seleccionada — ir a Check-in →':'✅ Voy a aplicar esta intervención'}</button>
+      </div>`;
+    }).join('')}`;
+}
+
+function applyIV(tipo,key,title){
+  ST.selInterv={tipo,key,title};save();renderNotifs();renderCards(key);
+  // Toast
+  const t=document.createElement('div');
+  t.className='toast alert-success';
+  t.innerHTML='✅ Intervención seleccionada. Ve a <strong>Check-in</strong> para registrar el resultado.';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3200);
+}
+
+// ═══════════ RENDER CHECKIN ═══════════
+function renderCheckin(){
+  // Historial
+  const histEl=document.getElementById('ci-hist');
+  const listEl=document.getElementById('hist-list');
+  if(ST.history.length){
+    histEl.style.display='block';
+    const rmap={mucho:{l:'🚀 Mejoró mucho',c:'hi-pos'},algo:{l:'📈 Mejoró algo',c:'hi-pos'},igual:{l:'➡️ Sin cambios',c:'hi-neu'},peor:{l:'📉 Empeoró',c:'hi-neg'}};
+    const tmap={r:'⚡',m:'⏱️',p:'🔍'};
+    listEl.innerHTML=[...ST.history].reverse().map(h=>{
+      const r=rmap[h.result]||rmap['igual'];
+      return`<div class="hist-item fade-in">
+        <div class="hi-icon">${tmap[h.interv?.tipo]||'🎯'}</div>
+        <div><p class="hi-title">${h.problem}</p>
+        <p class="hi-meta">${h.date} · ${h.interv?.title||'—'}</p>
+        <span class="hi-badge ${r.c}">${r.l}</span>
+        ${h.fbWorked?`<p class="hi-quote">"${h.fbWorked.slice(0,100)}${h.fbWorked.length>100?'…':''}"</p>`:''}</div>
+      </div>`;
+    }).join('');
+  }else histEl.style.display='none';
+
+  // Form / states
+  document.getElementById('ci-initial').style.display='none';
+  document.getElementById('ci-no-interv').style.display='none';
+  document.getElementById('ci-form').style.display='none';
+
+  if(ST.selInterv){
+    document.getElementById('ci-form').style.display='block';
+    document.getElementById('ci-interv-label').innerHTML=
+      `🎯 Intervención: <strong>${ST.selInterv.title}</strong> · ${ST.selProblem?.label||''}`;
+    document.querySelectorAll('.e-btn').forEach(b=>{b.classList.toggle('selected',b.dataset.val===ST.emojiPick)});
+  }else if(!ST.history.length){
+    document.getElementById('ci-initial').style.display='block';
+  }else{
+    document.getElementById('ci-no-interv').style.display='block';
   }
 }
 
-function completeFlow(){
-  clearIntervals();
-  if(S.currentFlowId==='eval'){
-    S.group.evalDone=true;
-    // Generate realistic random indicator values from the activity responses
-    const base=[52,68,45,58,43,36]; // realistic starting ranges per indicator
-    S.group.indicators.forEach((ind,i)=>{
-      ind.val=base[i]+Math.floor(Math.random()*20)-5;
-      ind.val=Math.max(10,Math.min(99,ind.val));
-    });
-    // Add first chart point (average of indicators)
-    const avg=Math.round(S.group.indicators.reduce((a,ind)=>a+ind.val,0)/S.group.indicators.length);
-    S.group.chartPts.push(avg);
-  }
-  if(S.currentFlowId==='socio'){
-    S.group.socioDone=true;
-    // Add small improvement point to chart
-    const last=S.group.chartPts.length>0?S.group.chartPts[S.group.chartPts.length-1]:50;
-    S.group.chartPts.push(Math.min(99,last+Math.floor(Math.random()*8)+2));
-  }
-  if(['reconect','motivacion','confianza'].includes(S.currentFlowId)&&S.group.evalDone){
-    // Subsequent activities add incremental improvement
-    const last=S.group.chartPts.length>0?S.group.chartPts[S.group.chartPts.length-1]:50;
-    const gain=Math.floor(Math.random()*10)+3;
-    const newPt=Math.min(99,last+gain);
-    S.group.chartPts.push(newPt);
-    // Slightly improve random indicators
-    S.group.indicators.forEach(ind=>{
-      ind.val=Math.min(99,ind.val+Math.floor(Math.random()*8));
-    });
-  }
-  backToMain();
+function pickEmoji(btn){document.querySelectorAll('.e-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');ST.emojiPick=btn.dataset.val}
+function toggleObs(btn){btn.classList.toggle('selected')}
+
+function submitFeedback(){
+  const applied=document.querySelector('input[name=applied]:checked');
+  if(!applied){alert('Indica si aplicaste la intervención');return}
+  const obs=[...document.querySelectorAll('.obs-chip.selected')].map(c=>c.textContent.trim());
+  ST.history.push({
+    id:Date.now(),problem:ST.selProblem?.label||'—',problemKey:ST.selProblem?.key||'—',
+    interv:ST.selInterv,applied:applied.value,result:ST.emojiPick||'igual',obs,
+    fbWorked:document.getElementById('fb-worked').value.trim(),
+    fbImprove:document.getElementById('fb-improve').value.trim(),
+    date:new Date().toLocaleDateString('es-ES'),ts:Date.now()
+  });
+  ST.selInterv=null;ST.emojiPick=null;save();renderNotifs();
+  // Reset
+  document.querySelectorAll('input[name=applied]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.e-btn,.obs-chip').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('fb-worked').value='';document.getElementById('fb-improve').value='';
+  document.getElementById('success-overlay').classList.add('show');
 }
+function closeSuccess(){document.getElementById('success-overlay').classList.remove('show');switchTab('checkin')}
 
-function animateRings(){
-  const c=226.2;
-  const b=document.getElementById('ring-b'),a=document.getElementById('ring-a');
-  if(b)b.style.strokeDashoffset=c*(1-0.52);
-  if(a)a.style.strokeDashoffset=c*(1-0.61);
+// ═══════════ BOOT ═══════════
+load();
+if(ST.user){
+  document.getElementById('user-chip').textContent=ST.user.split('@')[0];
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-app').classList.add('active');
+  initApp();
 }
-
-/* ═══════════════════════════════════════
-   STUDENT FLOW
-═══════════════════════════════════════ */
-function resetStudentScreen(){
-  document.getElementById('stu-join-form').style.display='flex';
-  document.getElementById('stu-waiting').classList.remove('on');
-  document.getElementById('stu-answer').classList.remove('on');
-  document.getElementById('stu-answered').classList.remove('on');
-  document.getElementById('stu-error').style.display='none';
-  document.getElementById('stu-code-inp').value='';
-  document.getElementById('stu-name-inp').value='';
-}
-
-function studentJoin(){
-  const code=document.getElementById('stu-code-inp').value.toUpperCase().trim();
-  const name=document.getElementById('stu-name-inp').value.trim();
-  const errEl=document.getElementById('stu-error');
-
-  if(!name){errEl.textContent='Por favor escribe tu nombre';errEl.style.display='block';return}
-  if(!code){errEl.textContent='Por favor introduce el código de sesión';errEl.style.display='block';return}
-
-  // Validate: accept only if a session is open OR accept any code in demo
-  // In demo mode: accept any 5-digit code or the real session code
-  const isValid=code===S.sessionCode||/^\d{5}$/.test(code)||code.length>=4;
-  if(!isValid){
-    errEl.textContent='Código incorrecto. Comprueba la pantalla del profesor.';
-    errEl.style.display='block';
-    return;
-  }
-  errEl.style.display='none';
-
-  S.studentName=name;
-  S.studentColor=AV_COLORS[Math.floor(Math.random()*AV_COLORS.length)];
-
-  // Add to lobby if not already there
-  if(!S.joinedStudents.find(s=>s.name===name)){
-    S.joinedStudents.push({name,color:S.studentColor,initials:name.charAt(0).toUpperCase()});
-    renderLobbyStudents();
-  }
-
-  document.getElementById('stu-join-form').style.display='none';
-  document.getElementById('sw-name').textContent=name;
-  document.getElementById('sw-code-badge').textContent='Código: '+code;
-  document.getElementById('stu-waiting').classList.add('on');
-
-  // Check if activity already started
-  if(S.activityStarted){
-    showStudentQuestion();
-  } else {
-    checkStudentStart();
-  }
-}
-
-function checkStudentStart(){
-  const check=setInterval(()=>{
-    if(S.activityStarted){
-      clearInterval(check);
-      showStudentQuestion();
-    }
-  },500);
-}
-
-function updateStudentView(){
-  const stuScreen=document.getElementById('s-student');
-  if(stuScreen.classList.contains('active')&&S.activityStarted){
-    showStudentQuestion();
-  }
-}
-
-function showStudentQuestion(){
-  const s=S.steps[S.currentStep];
-  document.getElementById('stu-waiting').classList.remove('on');
-  document.getElementById('stu-answered').classList.remove('on');
-  const ansEl=document.getElementById('stu-answer');
-
-  if(s.type==='result'){
-    ansEl.classList.remove('on');
-    document.getElementById('stu-answered').classList.add('on');
-    document.getElementById('stu-answered').innerHTML=`
-      <div class="sa-big-icon">🎉</div>
-      <div class="sa-fb-title">¡Actividad completada!</div>
-      <div class="sa-fb-sub" style="margin-bottom:28px">Gracias por participar, ${S.studentName}</div>
-      <button class="btn btn-or" style="padding:14px 32px;font-size:14px;border-radius:10px" onclick="showScreen('s-student');resetStudentScreen()">Volver al inicio</button>`;
-    return;
-  }
-
-  if(s.type==='intro'){
-    ansEl.classList.remove('on');
-    document.getElementById('stu-waiting').classList.add('on');
-    document.getElementById('sw-name').textContent=S.studentName;
-    document.querySelector('.sw-status').textContent='El profesor está configurando la actividad...';
-    return;
-  }
-
-  ansEl.classList.add('on');
-  ansEl.innerHTML=buildStudentQuestion(s);
-}
-
-function buildStudentQuestion(s){
-  const n=S.currentStep+1,tot=S.totalSteps;
-  let body='';
-  if(s.type==='k4'){
-    const cc=['c0','c1','c2','c3'],nn=['▲','●','■','✦'];
-    body=`<div class="sa-q-txt">${s.q}</div>
-    <div class="sa-k-grid">${s.opts.map((o,i)=>`<button class="sa-k-btn ${cc[i]}" onclick="studentAnswer(this,'${o}')">${nn[i]} ${o}</button>`).join('')}</div>`;
-  } else if(s.type==='scale'){
-    body=`<div class="sa-q-txt">${s.q}</div>
-    <div class="sa-scale-row">${s.emojis.map((e,i)=>`<button class="sa-scale-btn" onclick="studentAnswer(this,'${s.labels[i]}')"><span class="se">${e}</span><span class="sl">${s.labels[i]}</span></button>`).join('')}</div>`;
-  } else if(s.type==='text'){
-    body=`<div class="sa-q-txt">${s.q}</div>
-    <textarea class="sa-text-inp" id="sa-txt" rows="3" placeholder="${s.ph}"></textarea>
-    <button class="btn btn-or sa-send-btn" onclick="studentSendText()">Enviar →</button>`;
-  } else if(s.type==='socio'){
-    body=`<div class="sa-q-txt" style="margin-bottom:6px">${s.q}</div>
-    <div style="font-size:12px;color:rgba(255,255,255,.35);text-align:center;margin-bottom:16px">${s.hint}</div>
-    <div class="sa-socio-grid">${STUDENTS_LIST.map((st,i)=>`<div class="sa-socio-card" onclick="selSocioStu(this,${s.max})"><div class="sa-socio-av" style="background:${AV_COLORS[i]}">${st.charAt(0)}</div><div class="sa-socio-nm">${st}</div></div>`).join('')}</div>
-    <button class="btn btn-or sa-send-btn" onclick="studentSendSocio()">Confirmar →</button>`;
-  }
-
-  return `<div class="sa-top">
-    <span class="sa-qnum">Pregunta ${n} de ${tot}</span>
-    <span class="sa-name">${S.studentName}</span>
-  </div>
-  <div class="sa-body">${body}</div>`;
-}
-
-function studentAnswer(btn,val){
-  btn.closest('.sa-body').querySelectorAll('.sa-k-btn,.sa-scale-btn').forEach(b=>b.classList.remove('picked'));
-  btn.classList.add('picked');
-  setTimeout(()=>{
-    document.getElementById('stu-answer').classList.remove('on');
-    document.getElementById('stu-answered').classList.add('on');
-    document.getElementById('stu-answered').innerHTML=`
-      <div class="sa-big-icon">✅</div>
-      <div class="sa-fb-title">¡Respuesta enviada!</div>
-      <div class="sa-fb-sub">Espera la siguiente pregunta...</div>
-      <div class="sw-dots" style="margin-top:24px"><div class="sw-dot"></div><div class="sw-dot"></div><div class="sw-dot"></div></div>`;
-  },600);
-  // Poll for next step
-  waitForNextStep();
-}
-
-function studentSendText(){
-  const txt=document.getElementById('sa-txt');
-  if(txt&&txt.value.trim()===''){txt.style.borderColor='var(--or)';txt.focus();return}
-  document.getElementById('stu-answer').classList.remove('on');
-  document.getElementById('stu-answered').classList.add('on');
-  document.getElementById('stu-answered').innerHTML=`
-    <div class="sa-big-icon">✅</div>
-    <div class="sa-fb-title">¡Respuesta enviada!</div>
-    <div class="sa-fb-sub">Espera la siguiente pregunta...</div>
-    <div class="sw-dots" style="margin-top:24px"><div class="sw-dot"></div><div class="sw-dot"></div><div class="sw-dot"></div></div>`;
-  waitForNextStep();
-}
-
-function studentSendSocio(){
-  document.getElementById('stu-answer').classList.remove('on');
-  document.getElementById('stu-answered').classList.add('on');
-  document.getElementById('stu-answered').innerHTML=`
-    <div class="sa-big-icon">✅</div>
-    <div class="sa-fb-title">¡Selección enviada!</div>
-    <div class="sa-fb-sub">Espera la siguiente pregunta...</div>
-    <div class="sw-dots" style="margin-top:24px"><div class="sw-dot"></div><div class="sw-dot"></div><div class="sw-dot"></div></div>`;
-  waitForNextStep();
-}
-
-function selSocioStu(card,max){
-  const grid=card.closest('.sa-socio-grid');
-  if(card.classList.contains('sel')){card.classList.remove('sel');return}
-  if(grid.querySelectorAll('.sel').length<max)card.classList.add('sel');
-}
-
-// After answering, poll for teacher advancing to next step
-let _stuStep=-1;
-function waitForNextStep(){
-  _stuStep=S.currentStep;
-  const poll=setInterval(()=>{
-    if(S.currentStep!==_stuStep){
-      clearInterval(poll);
-      showStudentQuestion();
-    }
-  },500);
-}
-
-/* ═══ INIT ═══ */
-renderGroupsGrid();
+document.querySelectorAll('input[type=range]').forEach(el=>{
+  const p=(el.value-1)/4*100;
+  el.style.background=`linear-gradient(to right,var(--orange) ${p}%,var(--orange) ${p}%,#E2E8F0 ${p}%,#E2E8F0 100%)`;
+});
 </script>
 </body>
 </html>
