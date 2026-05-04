@@ -311,6 +311,7 @@ textarea.ta:focus{border-color:var(--orange)}
               <select class="inp" id="d-stage">
                 <option>Primaria</option><option selected>ESO</option>
                 <option>Bachillerato</option><option>FP</option>
+                <option>Universidad</option><option>Academia / otros</option>
               </select>
             </div>
           </div>
@@ -444,7 +445,20 @@ textarea.ta:focus{border-color:var(--orange)}
         </div>
       </div>
       <div id="ci-form" style="display:none">
-        <div class="alert-strip alert-info" id="ci-interv-label"></div>
+        <!-- Header con volver -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <p class="page-title" style="margin-bottom:2px">Check-in</p>
+            <p style="font-size:13px;color:var(--slate-mid)">Registra cómo fue la intervención</p>
+          </div>
+          <button class="btn-ghost" onclick="switchTab('interv')" style="flex-shrink:0;white-space:nowrap">← Ver intervenciones</button>
+        </div>
+        <!-- Resumen de la intervención activa -->
+        <div class="card" style="border-left:4px solid var(--orange);margin-bottom:16px">
+          <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);margin-bottom:5px">Intervención activa</p>
+          <p style="font-size:15px;font-weight:600;color:var(--slate)" id="ci-title-main">—</p>
+          <p style="font-size:13px;color:var(--slate-mid);margin-top:2px" id="ci-problem-main">—</p>
+        </div>
         <div class="card">
           <p class="card-title">¿Aplicaste la intervención?</p>
           <div class="radio-row" style="margin-top:10px">
@@ -480,6 +494,34 @@ textarea.ta:focus{border-color:var(--orange)}
           <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin:14px 0 6px">¿Qué mejorarías?</label>
           <textarea class="ta" id="fb-improve" placeholder="¿Cambiarías algo de la intervención?"></textarea>
         </div>
+
+        <div class="card">
+          <p class="card-title">¿Seguirías usando Klaizen?</p>
+          <p class="card-sub" style="margin-bottom:14px">Tu opinión es clave para seguir mejorando la herramienta</p>
+          <div class="radio-row" style="flex-wrap:wrap;gap:8px">
+            <div class="radio-pill"><input type="radio" name="would-use" id="wu-si" value="si"><label for="wu-si">✅ Sí, la usaría</label></div>
+            <div class="radio-pill"><input type="radio" name="would-use" id="wu-quiza" value="quiza"><label for="wu-quiza">🤔 Quizás</label></div>
+            <div class="radio-pill"><input type="radio" name="would-use" id="wu-no" value="no"><label for="wu-no">❌ Probablemente no</label></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="card-title">¿Qué más te gustaría que hiciera Klaizen?</p>
+          <p class="card-sub" style="margin-bottom:12px">Cuéntanos qué funcionalidad te resultaría más útil</p>
+          <div class="obs-chips" style="margin-bottom:14px" id="feature-chips">
+            <button class="obs-chip" onclick="toggleObs(this)">📊 Seguimiento del progreso</button>
+            <button class="obs-chip" onclick="toggleObs(this)">👥 Gestión de varios grupos</button>
+            <button class="obs-chip" onclick="toggleObs(this)">🗓️ Planificación semanal</button>
+            <button class="obs-chip" onclick="toggleObs(this)">📚 Más recursos y materiales</button>
+            <button class="obs-chip" onclick="toggleObs(this)">🤝 Compartir con otros docentes</button>
+            <button class="obs-chip" onclick="toggleObs(this)">📱 App móvil nativa</button>
+            <button class="obs-chip" onclick="toggleObs(this)">🔔 Recordatorios y avisos</button>
+            <button class="obs-chip" onclick="toggleObs(this)">📈 Informes para dirección</button>
+          </div>
+          <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:6px">Otras ideas o comentarios</label>
+          <textarea class="ta" id="fb-features" placeholder="¿Qué te gustaría que Klaizen hiciera y que aún no hace?"></textarea>
+        </div>
+
         <button class="btn-primary" onclick="submitFeedback()">📤 Guardar registro</button>
       </div>
       <div id="ci-initial">
@@ -697,18 +739,16 @@ function renderCards(key){
         <p class="interv-obj">🎯 ${d.obj}</p>
         <ol class="steps-list">${d.pasos.map(p=>`<li>${p}</li>`).join('')}</ol>
         <div class="script-box"><p class="script-eyebrow">Script docente</p><p class="script-text">${d.script}</p></div>
-        <button class="btn-apply ${isApplied?'applied':''}" onclick="applyIV('${t}','${key}','${d.title.replace(/'/g,"\\'")}')">${isApplied?'✅ Intervención seleccionada — ir a Check-in →':'✅ Voy a aplicar esta intervención'}</button>
+        <button class="btn-apply ${isApplied?'applied':''}" onclick="applyIV('${t}','${key}')">${isApplied?'✅ Intervención seleccionada — ir a Check-in →':'✅ Voy a aplicar esta intervención'}</button>
       </div>`;
     }).join('')}`;
 }
 
-function applyIV(tipo,key,title){
-  ST.selInterv={tipo,key,title};save();renderNotifs();renderCards(key);
-  // Toast
-  const t=document.createElement('div');
-  t.className='toast alert-success';
-  t.innerHTML='✅ Intervención seleccionada. Ve a <strong>Check-in</strong> para registrar el resultado.';
-  document.body.appendChild(t);setTimeout(()=>t.remove(),3200);
+function applyIV(tipo,key){
+  const data=IV[key]||IV['interrupciones'];
+  const title=data[tipo]?.title||'—';
+  ST.selInterv={tipo,key,title};save();renderNotifs();
+  switchTab('checkin');
 }
 
 // ═══════════ RENDER CHECKIN ═══════════
@@ -727,6 +767,7 @@ function renderCheckin(){
         <div><p class="hi-title">${h.problem}</p>
         <p class="hi-meta">${h.date} · ${h.interv?.title||'—'}</p>
         <span class="hi-badge ${r.c}">${r.l}</span>
+        ${h.wouldUse?`<span class="hi-badge" style="margin-left:4px;background:var(--slate-pale);color:var(--slate-mid)">${h.wouldUse==='si'?'🔁 Volvería a usarla':h.wouldUse==='quiza'?'🤔 Quizás volvería':'❌ No volvería'}</span>`:''}
         ${h.fbWorked?`<p class="hi-quote">"${h.fbWorked.slice(0,100)}${h.fbWorked.length>100?'…':''}"</p>`:''}</div>
       </div>`;
     }).join('');
@@ -739,8 +780,8 @@ function renderCheckin(){
 
   if(ST.selInterv){
     document.getElementById('ci-form').style.display='block';
-    document.getElementById('ci-interv-label').innerHTML=
-      `🎯 Intervención: <strong>${ST.selInterv.title}</strong> · ${ST.selProblem?.label||''}`;
+    document.getElementById('ci-title-main').textContent=ST.selInterv.title||'—';
+    document.getElementById('ci-problem-main').textContent=ST.selProblem?.label||'—';
     document.querySelectorAll('.e-btn').forEach(b=>{b.classList.toggle('selected',b.dataset.val===ST.emojiPick)});
   }else if(!ST.history.length){
     document.getElementById('ci-initial').style.display='block';
@@ -752,22 +793,63 @@ function renderCheckin(){
 function pickEmoji(btn){document.querySelectorAll('.e-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');ST.emojiPick=btn.dataset.val}
 function toggleObs(btn){btn.classList.toggle('selected')}
 
-function submitFeedback(){
+async function submitFeedback(){
   const applied=document.querySelector('input[name=applied]:checked');
   if(!applied){alert('Indica si aplicaste la intervención');return}
+
   const obs=[...document.querySelectorAll('.obs-chip.selected')].map(c=>c.textContent.trim());
-  ST.history.push({
-    id:Date.now(),problem:ST.selProblem?.label||'—',problemKey:ST.selProblem?.key||'—',
-    interv:ST.selInterv,applied:applied.value,result:ST.emojiPick||'igual',obs,
-    fbWorked:document.getElementById('fb-worked').value.trim(),
-    fbImprove:document.getElementById('fb-improve').value.trim(),
-    date:new Date().toLocaleDateString('es-ES'),ts:Date.now()
-  });
+  const wouldUse=document.querySelector('input[name=would-use]:checked')?.value||'';
+  const wantedFeatures=[...document.querySelectorAll('#feature-chips .obs-chip.selected')].map(c=>c.textContent.trim());
+  const fbWorked=document.getElementById('fb-worked').value.trim();
+  const fbImprove=document.getElementById('fb-improve').value.trim();
+  const fbFeatures=document.getElementById('fb-features').value.trim();
+  const now=new Date();
+
+  const record={
+    id:Date.now(),
+    problem:ST.selProblem?.label||'—',
+    problemKey:ST.selProblem?.key||'—',
+    interv:ST.selInterv,
+    applied:applied.value,
+    result:ST.emojiPick||'igual',
+    obs, fbWorked, fbImprove,
+    wouldUse, wantedFeatures, fbFeatures,
+    date:now.toLocaleDateString('es-ES'),
+    ts:Date.now()
+  };
+
+  // Guardar localmente
+  ST.history.push(record);
   ST.selInterv=null;ST.emojiPick=null;save();renderNotifs();
+
+  // Enviar a Formspree (sin bloquear la UX)
+  fetch('https://formspree.io/f/xkoyjdde',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({
+      '👤 Docente': ST.user||'—',
+      '📅 Fecha': now.toLocaleString('es-ES'),
+      '🎯 Problema trabajado': record.problem,
+      '⚡ Tipo de intervención': ({r:'Rápida',m:'Media',p:'Profunda'})[record.interv?.tipo]||'—',
+      '📋 Intervención': record.interv?.title||'—',
+      '✅ ¿La aplicó?': record.applied==='si'?'Sí':'No',
+      '📈 Resultado': ({mucho:'Mejoró mucho',algo:'Mejoró algo',igual:'Sin cambios',peor:'Empeoró'})[record.result]||'—',
+      '👁️ Observaciones': obs.join(', ')||'—',
+      '💬 ¿Qué funcionó?': fbWorked||'—',
+      '🔧 ¿Qué mejoraría?': fbImprove||'—',
+      '🔁 ¿Seguiría usando Klaizen?': ({si:'Sí',quiza:'Quizás',no:'Probablemente no'})[wouldUse]||'—',
+      '🚀 Funcionalidades deseadas': wantedFeatures.join(', ')||'—',
+      '💡 Otras ideas': fbFeatures||'—',
+    })
+  }).catch(()=>{}); // silencioso si falla la red
+
   // Reset
   document.querySelectorAll('input[name=applied]').forEach(r=>r.checked=false);
+  document.querySelectorAll('input[name=would-use]').forEach(r=>r.checked=false);
   document.querySelectorAll('.e-btn,.obs-chip').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('fb-worked').value='';document.getElementById('fb-improve').value='';
+  document.getElementById('fb-worked').value='';
+  document.getElementById('fb-improve').value='';
+  document.getElementById('fb-features').value='';
   document.getElementById('success-overlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('success-overlay').classList.remove('show');switchTab('checkin')}
