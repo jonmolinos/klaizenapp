@@ -203,6 +203,7 @@ textarea.ta:focus{border-color:var(--orange)}
 /* ANIMATIONS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes bounceIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .fade-in{animation:fadeUp .3s ease both}
 
 @media(max-width:480px){.login-card{padding:36px 22px}}
@@ -546,7 +547,7 @@ textarea.ta:focus{border-color:var(--orange)}
 
 <script>
 // ═══════════ STATE ═══════════
-const ST={user:'',thermo:null,diagDone:false,diagData:null,problems:[],selProblem:null,selInterv:null,emojiPick:null,history:[]};
+const ST={user:'',thermo:null,diagDone:false,diagData:null,problems:[],aiDiag:null,aiIntervs:{},selProblem:null,selInterv:null,emojiPick:null,history:[]};
 function save(){try{localStorage.setItem('klz3',JSON.stringify(ST))}catch(e){}}
 function load(){try{const d=localStorage.getItem('klz3');if(d)Object.assign(ST,JSON.parse(d))}catch(e){}}
 
@@ -579,7 +580,7 @@ function switchTab(t){
 // ═══════════ INIT ═══════════
 function initApp(){
   initSliders();
-  if(ST.diagDone){showDiagResult();goDS(3,true)}
+  if(ST.diagDone && ST.aiDiag){showAIDiagResult();goDS(3,true)}
   renderNotifs();
 }
 function initSliders(){document.querySelectorAll('input[type=range]').forEach(setSB)}
@@ -596,60 +597,121 @@ function goDS(n,silent){
   if(!silent)document.querySelector('.tab-content').scrollTo(0,0);
 }
 
-// ═══════════ ANALYSIS ═══════════
-const DESCS={
-  interrupciones:'El aula presenta interrupciones frecuentes que fragmentan el ritmo de aprendizaje y dificultan la concentración.',
-  apatia:'El grupo muestra desconexión y falta de motivación hacia las tareas propuestas.',
-  conflictos:'Hay tensiones entre alumnos que deterioran el ambiente de trabajo colectivo.',
-  desafiantes:'Uno o varios alumnos desafían de forma sistemática las normas del aula.',
-  cohesion:'El grupo no funciona como equipo; hay fricciones y falta de sentido de pertenencia.',
-  ansiedad:'Se percibe nerviosismo o ansiedad que bloquea el aprendizaje y la participación.',
-  fatiga:'El nivel de estrés docente está impactando en la gestión y el clima del aula.',
-};
-
-function runAnalysis(){
+// ═══════════ AI DIAGNOSIS ═══════════
+async function runAnalysis(){
   const r=+document.getElementById('s-ruido').value,i=+document.getElementById('s-inter').value,
         a=+document.getElementById('s-aten').value,c=+document.getElementById('s-conf').value,
         re=+document.getElementById('s-resp').value,im=+document.getElementById('s-impul').value,
         fr=+document.getElementById('s-frus').value,au=+document.getElementById('s-auto').value,
         es=+document.getElementById('s-estres').value,ct=+document.getElementById('s-ctrl').value;
   const tutor=document.querySelector('input[name=tutor]:checked')?.value||'no';
-  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,tutor};
-  const raw=[
-    {key:'interrupciones',label:'Interrupciones constantes',emoji:'🙋',score:(r+i)/2},
-    {key:'apatia',label:'Apatía y baja atención',emoji:'😴',score:(5-a+5-au)/2},
-    {key:'conflictos',label:'Conflictos entre alumnos',emoji:'⚡',score:c},
-    {key:'desafiantes',label:'Alumnos desafiantes',emoji:'😠',score:(5-re+im)/2},
-    {key:'cohesion',label:'Baja cohesión grupal',emoji:'🧩',score:(c+5-re)/2},
-    {key:'ansiedad',label:'Ansiedad grupal',emoji:'😰',score:(fr+es)/2},
-    {key:'fatiga',label:'Fatiga docente',emoji:'😓',score:es},
-  ];
-  raw.sort((a,b)=>b.score-a.score);
-  ST.problems=raw;ST.diagDone=true;ST.selProblem=null;ST.selInterv=null;save();
-  showDiagResult();renderNotifs();goDS(3);
+  const subj=document.getElementById('d-subj').value.trim()||'sin especificar';
+  const stage=document.getElementById('d-stage').value;
+  const thermoLabels={caotic:'Caótico (sin control)',unstable:'Inestable (intermitente)',improving:'Mejorando (con altibajos)',stable:'Estable (buen clima)'};
+  const thermo=thermoLabels[ST.thermo]||'No indicado';
+
+  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,tutor,subj,stage};
+  ST.diagDone=true; ST.selProblem=null; ST.selInterv=null; ST.aiDiag=null; ST.aiIntervs={};
+  save();
+
+  // Show loading state
+  goDS(3);
+  document.getElementById('dh-title').textContent='Analizando tu aula…';
+  document.getElementById('dh-desc').textContent='La IA está procesando tus respuestas. Un momento.';
+  document.getElementById('indicators-list').innerHTML=loadingHTML('Generando diagnóstico personalizado');
+  document.getElementById('iv-cards').innerHTML='';
+
+  const prompt=`Eres Klaizen, un asistente experto en psicología del aula y gestión del clima escolar. Analiza los datos de este docente y genera un diagnóstico real, preciso y empático.
+
+DATOS DEL DOCENTE:
+- Asignatura: ${subj}
+- Etapa: ${stage}
+- ¿Es tutor/a?: ${tutor==='si'?'Sí':'No'}
+- Percepción del clima hoy: ${thermo}
+
+INDICADORES (escala 1=mínimo, 5=máximo):
+- Nivel de ruido: ${r}/5
+- Interrupciones: ${i}/5
+- Atención del grupo: ${a}/5 (5=máxima atención)
+- Conflictos entre alumnos: ${c}/5
+- Respeto hacia el docente: ${re}/5 (5=máximo respeto)
+- Impulsividad: ${im}/5
+- Tolerancia a la frustración: ${fr}/5 (5=máxima tolerancia)
+- Autonomía en el trabajo: ${au}/5 (5=máxima autonomía)
+- Estrés docente: ${es}/5
+- Sensación de control: ${ct}/5 (5=máximo control)
+
+Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta (sin markdown, sin explicaciones):
+{
+  "problema_principal": {
+    "titulo": "Nombre breve del problema principal (máx 6 palabras)",
+    "emoji": "emoji relevante",
+    "descripcion": "2-3 frases directas y empáticas que expliquen qué está pasando en ESTE aula concreta, basándote en los datos. Habla en segunda persona al docente. Sin tecnicismos."
+  },
+  "problemas_secundarios": [
+    {"titulo": "Problema 2", "emoji": "emoji"},
+    {"titulo": "Problema 3", "emoji": "emoji"},
+    {"titulo": "Problema 4", "emoji": "emoji"}
+  ],
+  "mensaje_docente": "Una frase corta de apoyo y esperanza, realista y cálida. Que el docente sienta que tiene solución.",
+  "fortalezas": ["Aspecto positivo 1 detectado en los datos", "Aspecto positivo 2"]
+}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    ST.aiDiag=JSON.parse(clean);
+    save();
+    renderNotifs();
+    showAIDiagResult();
+  }catch(e){
+    document.getElementById('dh-title').textContent='⚠️ Error al conectar con la IA';
+    document.getElementById('dh-desc').textContent='Comprueba tu conexión y vuelve a intentarlo.';
+    document.getElementById('indicators-list').innerHTML='';
+  }
 }
 
-function showDiagResult(){
-  if(!ST.problems.length)return;
-  const m=ST.problems[0];
-  document.getElementById('dh-title').textContent=m.emoji+' '+m.label;
-  document.getElementById('dh-desc').textContent=DESCS[m.key];
+function showAIDiagResult(){
+  const d=ST.aiDiag;if(!d)return;
+  document.getElementById('dh-title').textContent=d.problema_principal.emoji+' '+d.problema_principal.titulo;
+  document.getElementById('dh-desc').textContent=d.problema_principal.descripcion;
   const tl={caotic:'🔴 Caótico',unstable:'🟠 Inestable',improving:'🟡 Mejorando',stable:'🟢 Estable'};
-  document.getElementById('diag-thermo-val').textContent='Termómetro: '+(ST.thermo?tl[ST.thermo]:'No seleccionado');
-  const d=ST.diagData;if(!d)return;
+  document.getElementById('diag-thermo-val').textContent='Termómetro: '+(ST.thermo?tl[ST.thermo]:'No indicado');
+
+  const dd=ST.diagData;
   const inds=[
-    {label:'Ruido',val:d.r,neg:true},{label:'Interrupciones',val:d.i,neg:true},
-    {label:'Atención',val:d.a,neg:false},{label:'Conflictos',val:d.c,neg:true},
-    {label:'Respeto',val:d.re,neg:false},{label:'Impulsividad',val:d.im,neg:true},
-    {label:'Estrés docente',val:d.es,neg:true},{label:'Control docente',val:d.ct,neg:false},
+    {label:'Ruido',val:dd.r,neg:true},{label:'Interrupciones',val:dd.i,neg:true},
+    {label:'Atención',val:dd.a,neg:false},{label:'Conflictos',val:dd.c,neg:true},
+    {label:'Respeto',val:dd.re,neg:false},{label:'Impulsividad',val:dd.im,neg:true},
+    {label:'Estrés docente',val:dd.es,neg:true},{label:'Control docente',val:dd.ct,neg:false},
   ];
-  inds.sort((a,b)=>{return(b.neg?b.val:5-b.val)-(a.neg?a.val:5-a.val)});
-  document.getElementById('indicators-list').innerHTML=inds.slice(0,4).map(ind=>{
+  inds.sort((a,b)=>(b.neg?b.val:5-b.val)-(a.neg?a.val:5-a.val));
+  let html=inds.slice(0,4).map(ind=>{
     const concern=ind.neg?ind.val>3:ind.val<3;
     const col=concern?'var(--red)':ind.val===3?'var(--amber)':'var(--green)';
-    const bar=`<div style="flex:1;height:6px;background:#E8ECF2;border-radius:3px;overflow:hidden"><div style="width:${(ind.val/5)*100}%;height:100%;background:${col};border-radius:3px"></div></div>`;
-    return `<div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;width:140px;flex-shrink:0">${ind.label}</span>${bar}<span style="font-size:12px;font-weight:700;color:${col};width:28px;text-align:right">${ind.val}/5</span></div>`;
+    const bar=`<div style="flex:1;height:6px;background:#E8ECF2;border-radius:3px;overflow:hidden"><div style="width:${(ind.val/5)*100}%;height:100%;background:${col};border-radius:3px;transition:width .5s"></div></div>`;
+    return`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;width:140px;flex-shrink:0">${ind.label}</span>${bar}<span style="font-size:12px;font-weight:700;color:${col};width:28px;text-align:right">${ind.val}/5</span></div>`;
   }).join('');
+
+  if(d.fortalezas?.length){
+    html+=`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:8px">✨ Puntos fuertes detectados</p>`;
+    html+=d.fortalezas.map(f=>`<p style="font-size:13px;color:var(--slate);margin-bottom:4px">• ${f}</p>`).join('');
+    html+='</div>';
+  }
+  if(d.mensaje_docente){
+    html+=`<div style="margin-top:14px;padding:12px 14px;background:var(--orange-pale);border-radius:10px;border-left:3px solid var(--orange)"><p style="font-size:13px;color:var(--orange-d);font-style:italic;line-height:1.5">${d.mensaje_docente}</p></div>`;
+  }
+  document.getElementById('indicators-list').innerHTML=html;
 }
 
 // ═══════════ NOTIFS ═══════════
@@ -658,46 +720,18 @@ function renderNotifs(){
   document.getElementById('nd-checkin').style.display=ST.selInterv?'block':'none';
 }
 
-// ═══════════ INTERVENTIONS DATA ═══════════
-const IV={
-  interrupciones:{
-    r:{title:'La señal de silencio',obj:'Restablecer el silencio en menos de 30 segundos sin levantar la voz.',pasos:['Para de hablar y levanta la mano abierta hacia la clase.','Espera en silencio. Los que te vean se callan y levantan también su mano.','Cuenta mentalmente hasta 10.','Agradece brevemente y continúa.'],script:'"Solo para y levanta la mano. El silencio hace el trabajo."'},
-    m:{title:'El semáforo de turno de palabra',obj:'Gestionar las intervenciones con un sistema visual claro y compartido.',pasos:['Explica: "Vamos a usar el semáforo de turno de palabra."','Rojo = nadie habla. Amarillo = levanta la mano. Verde = solo quien yo señale.','Practica 2 minutos con preguntas sencillas.','Refuerza positivamente cada vez que funcione.'],script:'"Cuando alguien interrumpa, señala el semáforo sin detenerte. Si insiste: \'Espero tu turno.\'"'},
-    p:{title:'Asamblea de normas de comunicación',obj:'Redefinir colectivamente las normas de comunicación del grupo.',pasos:['Abre espacio: "Necesitamos hablar de cómo nos comunicamos en clase."','Pregunta al grupo: ¿Qué normas necesitamos para que todos puedan aprender?','Recoge 3-5 propuestas y votad juntos.','Colgad el acuerdo en un lugar visible.','Revisad en 2 semanas.'],script:'"Este tiempo es para que decidáis cómo queréis que sea esta clase. Yo solo facilito. Vosotros decidís."'},
-  },
-  apatia:{
-    r:{title:'El reto de los 2 minutos',obj:'Activar al grupo con un desafío pequeño y concreto.',pasos:['Lanza un reto muy específico: "En 2 minutos, escribe 3 cosas que ya sabes sobre este tema."','Pon un temporizador visible.','Comparte 2-3 respuestas en voz alta.','Conecta con la lección del día.'],script:'"No pidas esfuerzo general. Pide una micro-tarea concreta. La acción rompe la apatía."'},
-    m:{title:'Aprendizaje entre pares',obj:'Crear responsabilidad compartida y activar la motivación intrínseca.',pasos:['Divide en parejas o tríos heterogéneos.','Asigna una micro-pregunta del tema a cada grupo.','3 minutos para preparar una explicación de 1 minuto.','Cada grupo explica al resto.','El docente refuerza y complementa.'],script:'"Vais a ser los expertos de vuestro punto. Vuestros compañeros aprenden de vosotros."'},
-    p:{title:'Proyecto de conexión con la vida real',obj:'Vincular el contenido a la vida real del alumno para generar motivación.',pasos:['Dedica 5 minutos a preguntar qué les preocupa, interesa o divierte.','Analiza los contenidos y conecta 3-4 puntos con sus intereses.','Diseña una actividad donde el contenido resuelve algo de su vida.','Presenta la conexión de forma explícita.','Evalúa la implicación al cabo de 1 semana.'],script:'"Hoy vamos a ver por qué esto tiene que ver con algo que vosotros ya vivís."'},
-  },
-  conflictos:{
-    r:{title:'Pausa y separación preventiva',obj:'Desactivar el conflicto antes de que escale.',pasos:['Identifica el foco del conflicto.','Con calma y sin dramatizar: "Necesito que os sentéis separados."','Continúa la clase como si nada.','Al terminar, habla brevemente con cada parte por separado.'],script:'"No preguntes qué pasó delante del grupo. Solo actúa: \'Aquí y aquí, por favor.\' Sin debate."'},
-    m:{title:'Círculo de escucha',obj:'Dar espacio a todas las partes para expresarse y buscar acuerdo.',pasos:['Siéntate con los implicados en círculo, sin mesa.','Regla: solo habla quien tiene el objeto.','Cada uno explica su versión sin interrupciones.','El docente parafrasea lo que escucha.','Proponed juntos una solución mínima viable.'],script:'"No busco quién tiene razón. Busco entender qué pasó y cómo lo arreglamos juntos."'},
-    p:{title:'Mediación entre iguales',obj:'Implementar un protocolo sostenible de resolución de conflictos.',pasos:['Presenta el rol de "mediador de aula" al grupo.','Forma a 3-4 alumnos con un protocolo básico.','Ante conflictos, activan el proceso antes de llegar al docente.','El tutor supervisa y valida los acuerdos.','Revisión mensual del funcionamiento.'],script:'"Vais a ser los responsables de ayudar a resolver los problemas del aula. Eso es una responsabilidad real."'},
-  },
-  desafiantes:{
-    r:{title:'Contacto visual + nombre',obj:'Redirigir el comportamiento sin confrontación pública.',pasos:['Cuando el alumno desafíe, mantén contacto visual 3 segundos.','Di su nombre en tono neutro.','Pausa.','Continúa con la clase.'],script:'"Solo el nombre. Sin regañinas. El silencio es más potente que cualquier discurso."'},
-    m:{title:'La conversación en privado',obj:'Entender qué hay detrás del comportamiento desafiante.',pasos:['Busca 3 minutos sin presión (recreo, antes de clase).','Pregunta: "¿Estás bien? ¿Hay algo que no te gusta?"','Escucha sin juzgar.','Ofrece un pequeño cambio real y posible.','Agradece que te lo haya contado.'],script:'"No vengo a regañarte. Vengo a entenderte."'},
-    p:{title:'Plan de conducta individualizado',obj:'Crear un acuerdo de comportamiento sostenible.',pasos:['Reúnete con el alumno y, si es posible, con la familia.','Identifica 2-3 comportamientos concretos a trabajar.','Define refuerzos positivos específicos.','Sistema de seguimiento semanal.','Revisión mensual y ajuste.'],script:'"Este plan no es un castigo. Es un acuerdo para que las cosas funcionen mejor para ti y para el grupo."'},
-  },
-  cohesion:{
-    r:{title:'La ronda de nombres positivos',obj:'Activar el sentido de pertenencia en 3 minutos.',pasos:['De pie en círculo o desde el sitio.','Cada alumno dice el nombre de la persona a su izquierda + algo positivo.','El docente empieza para modelar.'],script:'"Hoy empezamos con algo diferente. Quiero que os miréis."'},
-    m:{title:'Proyecto colaborativo exprés',obj:'Crear interdependencia positiva entre alumnos.',pasos:['Define un reto grupal con un producto visible.','Asigna roles: coordinador, redactor, buscador, presentador.','10 minutos de trabajo.','Presentación exprés.','Reflexión: ¿qué ha aportado cada uno?'],script:'"Esto solo funciona si cada uno hace su parte. El resultado es de todos."'},
-    p:{title:'Proyecto de conocimiento mutuo',obj:'Profundizar en el conocimiento entre alumnos para crear lazos reales.',pasos:['Actividad "quién soy yo" (foto, objeto, historia).','Cada alumno presenta 2 minutos.','El grupo hace preguntas respetuosas.','Mural del grupo visible en clase.','Repetir cada trimestre.'],script:'"Quiero que os conozcáis de verdad, no solo de estar en la misma clase."'},
-  },
-  ansiedad:{
-    r:{title:'Respiración 4-4-4',obj:'Bajar la activación del grupo en 90 segundos.',pasos:['Pide que se sienten rectos y bajen la mirada.','Inhala 4 seg, aguanta 4, exhala 4. Repetid 3 veces.','En tono tranquilo: "Ahora estamos aquí. No hay prisa."','Abre suavemente la actividad.'],script:'"Antes de empezar, un momento de calma. Seguidme." (sin pedir explicaciones)'},
-    m:{title:'El muro de preocupaciones',obj:'Externalizar preocupaciones para dejar espacio al aprendizaje.',pasos:['Reparte post-its.','Escribe algo que te preocupa (no tiene que ser de clase).','Los pegan en mural "aparcados por ahora".','Reconoce: "Estos están aquí. Los dejamos mientras trabajamos."','Al final: ¿alguien quiere comentar alguno?'],script:'"No voy a leer lo que escribís. Al dejarlo ahí, dejamos que la clase fluya."'},
-    p:{title:'Programa de regulación emocional',obj:'Desarrollar habilidades de autorregulación sostenidas.',pasos:['5 minutos al inicio de 2-3 clases/semana: respiración, body scan, journaling.','Introduce vocabulario emocional progresivamente.','Conecta con la materia.','Evalúa el clima emocional cada 2 semanas.'],script:'"Esto no es yoga. Es entrenar vuestra mente igual que entrenáis el cuerpo."'},
-  },
-  fatiga:{
-    r:{title:'El "solo esto"',obj:'Reducir la sobrecarga mental con foco radical.',pasos:['Antes de entrar al aula, identifica UNA sola cosa que quieres que pase hoy.','Escríbela.','Deja el resto como secundario.','Al salir: ¿pasó? Si sí, fue un buen día.'],script:'(Para ti) "Hoy mi único objetivo es que al menos 5 alumnos entiendan el concepto de X."'},
-    m:{title:'Check-in emocional propio',obj:'Conectar con tu estado antes de que afecte al aula.',pasos:['Llega 3 minutos antes.','Pregúntate: ¿Cómo estoy del 1 al 10?','Si <5: respiración 4-4-4, ajusta expectativas.','Si es necesario, comunícalo: "Hoy estoy cansado. Necesito vuestra colaboración."','Tras la clase: ¿qué me ha dado energía? ¿qué me ha quitado?'],script:'"Ser transparente contigo mismo es el primer paso."'},
-    p:{title:'Plan de autocuidado docente',obj:'Crear rutinas sostenibles que prevengan el burnout.',pasos:['Identifica tus 3 principales fuentes de estrés profesional.','Diseña una acción pequeña y realista por cada una.','Planifica 1 actividad de recarga semanal (no negociable).','Busca un compañero de referencia con quien compartir.','Revisión mensual.'],script:'"Cuidarme no es egoísta. Es lo que me permite seguir siendo un buen docente."'},
-  },
-};
+// ═══════════ LOADING HTML ═══════════
+function loadingHTML(msg){
+  return`<div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+    <div style="width:20px;height:20px;border:2.5px solid var(--orange-pale2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div>
+    <span style="font-size:13px;color:var(--slate-mid)">${msg}</span>
+  </div>`;
+}
 
 // ═══════════ RENDER INTERVENCIÓN ═══════════
+// Lookup table to avoid passing strings inside onclick HTML attributes
+let _probList=[];
+
 function renderInterv(){
   if(!ST.diagDone){
     document.getElementById('iv-no-diag').style.display='block';
@@ -705,49 +739,173 @@ function renderInterv(){
   }
   document.getElementById('iv-no-diag').style.display='none';
   document.getElementById('iv-content').style.display='block';
-  const m=ST.problems[0];
+
+  const d=ST.aiDiag;
+  if(!d){
+    document.getElementById('main-chip').innerHTML='<span style="font-size:13px;color:var(--slate-light)">Cargando diagnóstico…</span>';
+    document.getElementById('sec-chips').innerHTML='';
+    return;
+  }
+
+  // Build a flat list of problems for safe index-based onclick
+  const mp=d.problema_principal;
+  _probList=[{titulo:mp.titulo,emoji:mp.emoji},...(d.problemas_secundarios||[])];
+
   document.getElementById('main-chip').innerHTML=
-    `<button class="pchip ${ST.selProblem?.key===m.key?'selected':''}" onclick="selProb('${m.key}','${m.label}')">${m.emoji} ${m.label}</button>`;
-  document.getElementById('sec-chips').innerHTML=ST.problems.slice(1,5).map(p=>
-    `<button class="pchip ${ST.selProblem?.key===p.key?'selected':''}" onclick="selProb('${p.key}','${p.label}')">${p.emoji} ${p.label}</button>`
+    `<button class="pchip ${ST.selProblem?.label===mp.titulo?'selected':''}"
+      onclick="selProb(0)"
+    >${mp.emoji} ${mp.titulo}</button>`;
+
+  document.getElementById('sec-chips').innerHTML=(d.problemas_secundarios||[]).map((p,i)=>
+    `<button class="pchip ${ST.selProblem?.label===p.titulo?'selected':''}"
+      onclick="selProb(${i+1})"
+    >${p.emoji} ${p.titulo}</button>`
   ).join('');
-  if(ST.selProblem)renderCards(ST.selProblem.key);
-  else document.getElementById('iv-cards').innerHTML='<p style="font-size:13px;color:var(--slate-mid);text-align:center;margin-top:8px">Selecciona un problema para ver las intervenciones ↑</p>';
+
+  if(ST.selProblem){
+    if(ST.aiIntervs[ST.selProblem.label]) renderAICards(ST.selProblem.label);
+    else fetchIntervenciones(ST.selProblem.label);
+  } else {
+    document.getElementById('iv-cards').innerHTML='<p style="font-size:13px;color:var(--slate-mid);text-align:center;margin-top:8px">Selecciona un problema para ver las intervenciones ↑</p>';
+  }
 }
 
-function selProb(key,label){
-  ST.selProblem={key,label};ST.selInterv=null;save();renderNotifs();
+function selProb(idx){
+  const p=_probList[idx];
+  if(!p)return;
+  ST.selProblem={key:p.titulo,label:p.titulo};
+  ST.selInterv=null;save();renderNotifs();
   document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('selected'));
   event.currentTarget.classList.add('selected');
-  renderCards(key);
+  if(ST.aiIntervs[p.titulo]) renderAICards(p.titulo);
+  else fetchIntervenciones(p.titulo);
 }
 
-function renderCards(key){
-  const data=IV[key]||IV['interrupciones'];
-  const tutor=ST.diagData?.tutor==='si';
-  const tipos=tutor?['r','m','p']:['r','m'];
-  const lbl={r:'⚡ Rápida · 1–3 min',m:'⏱️ Media · 5–10 min',p:'🔍 Profunda · Solo tutores'};
-  const bcls={r:'badge-r',m:'badge-m',p:'badge-p'};
+async function fetchIntervenciones(problema){
   document.getElementById('iv-cards').innerHTML=`
-    <p class="page-title" style="margin-top:10px;margin-bottom:4px">Intervenciones recomendadas</p>
-    <p class="page-sub">${ST.selProblem.label}</p>
-    ${tipos.map(t=>{
-      const d=data[t];const isApplied=ST.selInterv?.tipo===t&&ST.selInterv?.key===key;
-      return`<div class="interv-card ${t} ${isApplied?'applied-card':''} fade-in">
-        <span class="interv-badge ${bcls[t]}">${lbl[t]}</span>
-        <p class="interv-title">${d.title}</p>
-        <p class="interv-obj">🎯 ${d.obj}</p>
-        <ol class="steps-list">${d.pasos.map(p=>`<li>${p}</li>`).join('')}</ol>
-        <div class="script-box"><p class="script-eyebrow">Script docente</p><p class="script-text">${d.script}</p></div>
-        <button class="btn-apply ${isApplied?'applied':''}" onclick="applyIV('${t}','${key}')">${isApplied?'✅ Intervención seleccionada — ir a Check-in →':'✅ Voy a aplicar esta intervención'}</button>
+    <div style="margin-top:16px">${loadingHTML('Generando intervenciones personalizadas para tu aula…')}</div>`;
+
+  const dd=ST.diagData||{};
+  const tutor=dd.tutor==='si';
+
+  const prompt=`Eres Klaizen, experto en gestión del clima de aula y bienestar docente. Genera intervenciones pedagógicas REALES, específicas y de alto impacto para este docente.
+
+CONTEXTO:
+- Asignatura: ${dd.subj||'no especificada'}
+- Etapa: ${dd.stage||'no especificada'}
+- Es tutor/a: ${tutor?'Sí':'No'}
+- Problema a trabajar: "${problema}"
+- Estrés docente: ${dd.es||3}/5
+- Nivel de ruido: ${dd.r||3}/5, Interrupciones: ${dd.i||3}/5
+- Atención: ${dd.a||3}/5, Conflictos: ${dd.c||3}/5
+- Sensación de control: ${dd.ct||3}/5
+
+CRITERIOS OBLIGATORIOS para las intervenciones:
+- Deben ser fáciles de aplicar (sin preparación elaborada)
+- Alto impacto inmediato y visible
+- El docente debe sentirse bien y con control después de aplicarlas
+- Lenguaje práctico, directo, sin teoría pedagógica
+- Scripts realistas que un docente real diría
+
+Devuelve ÚNICAMENTE un JSON válido (sin markdown):
+{
+  "intervenciones": [
+    {
+      "tipo": "rapida",
+      "badge": "⚡ Rápida · 1–3 min",
+      "titulo": "Nombre memorable de la intervención",
+      "objetivo": "Una frase: qué consigues exactamente al aplicarla",
+      "pasos": ["Paso 1 muy concreto", "Paso 2", "Paso 3", "Paso 4"],
+      "script": "Frase literal que el docente puede decir en clase",
+      "por_que_funciona": "Explicación breve (1 frase) de por qué esta técnica es efectiva",
+      "como_te_sentiras": "Qué sentirá el docente después de aplicarla (1 frase positiva)"
+    },
+    {
+      "tipo": "media",
+      "badge": "⏱️ Media · 5–10 min",
+      "titulo": "...",
+      "objetivo": "...",
+      "pasos": ["...", "...", "...", "..."],
+      "script": "...",
+      "por_que_funciona": "...",
+      "como_te_sentiras": "..."
+    }
+    ${tutor?`,{
+      "tipo": "profunda",
+      "badge": "🔍 Profunda · Solo tutores",
+      "titulo": "...",
+      "objetivo": "...",
+      "pasos": ["...", "...", "...", "...", "..."],
+      "script": "...",
+      "por_que_funciona": "...",
+      "como_te_sentiras": "..."
+    }`:''}
+  ]
+}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    ST.aiIntervs[problema]=parsed.intervenciones;
+    save();
+    renderAICards(problema);
+  }catch(e){
+    document.getElementById('iv-cards').innerHTML=
+      `<div class="card" style="text-align:center;color:var(--red)">
+        <p style="font-size:14px">⚠️ Error al generar las intervenciones.</p>
+        <p style="font-size:12px;margin-top:4px;color:var(--slate-mid)">Comprueba tu conexión e inténtalo de nuevo.</p>
+        <button class="btn-ghost" style="margin-top:12px" onclick="fetchIntervenciones(ST.selProblem.label)">Reintentar</button>
+      </div>`;
+  }
+}
+
+let _intervList=[];
+
+function renderAICards(problema){
+  const intervs=ST.aiIntervs[problema];
+  if(!intervs){fetchIntervenciones(problema);return;}
+  _intervList=intervs; // store for safe index-based onclick
+  const bcls={rapida:'badge-r r',media:'badge-m m',profunda:'badge-p p'};
+  document.getElementById('iv-cards').innerHTML=`
+    <p class="page-title" style="margin-top:10px;margin-bottom:4px">Intervenciones para tu aula</p>
+    <p class="page-sub">${problema}</p>
+    ${intervs.map((iv,idx)=>{
+      const cls=bcls[iv.tipo]||'badge-r r';
+      const isApplied=ST.selInterv?.titulo===iv.titulo;
+      return`<div class="interv-card ${cls.split(' ')[1]||''} ${isApplied?'applied-card':''} fade-in">
+        <span class="interv-badge ${cls.split(' ')[0]}">${iv.badge}</span>
+        <p class="interv-title">${iv.titulo}</p>
+        <p class="interv-obj">🎯 ${iv.objetivo}</p>
+        <ol class="steps-list">${iv.pasos.map(p=>`<li>${p}</li>`).join('')}</ol>
+        <div class="script-box">
+          <p class="script-eyebrow">Script docente — puedes decir esto literalmente</p>
+          <p class="script-text">"${iv.script}"</p>
+        </div>
+        ${iv.por_que_funciona?`<div style="margin-top:10px;padding:10px 12px;background:var(--slate-pale);border-radius:8px"><p style="font-size:11px;font-weight:700;color:var(--slate-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">¿Por qué funciona?</p><p style="font-size:12px;color:var(--slate)">${iv.por_que_funciona}</p></div>`:''}
+        ${iv.como_te_sentiras?`<div style="margin-top:8px;padding:10px 12px;background:var(--green-pale);border-radius:8px"><p style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Después de aplicarla</p><p style="font-size:12px;color:var(--green-d)">${iv.como_te_sentiras}</p></div>`:''}
+        <button class="btn-apply ${isApplied?'applied':''}" onclick="applyIV(${idx})">
+          ${isApplied?'✅ Seleccionada — ir a Check-in →':'✅ Voy a aplicar esta intervención'}
+        </button>
       </div>`;
     }).join('')}`;
 }
 
-function applyIV(tipo,key){
-  const data=IV[key]||IV['interrupciones'];
-  const title=data[tipo]?.title||'—';
-  ST.selInterv={tipo,key,title};save();renderNotifs();
+function applyIV(idx){
+  const iv=_intervList[idx];
+  if(!iv)return;
+  ST.selInterv={tipo:iv.tipo,key:ST.selProblem?.label||'—',title:iv.titulo,label:iv.titulo};
+  save();renderNotifs();
   switchTab('checkin');
 }
 
@@ -780,8 +938,8 @@ function renderCheckin(){
 
   if(ST.selInterv){
     document.getElementById('ci-form').style.display='block';
-    document.getElementById('ci-title-main').textContent=ST.selInterv.title||'—';
-    document.getElementById('ci-problem-main').textContent=ST.selProblem?.label||'—';
+    document.getElementById('ci-title-main').textContent=ST.selInterv.title||ST.selInterv.label||'—';
+    document.getElementById('ci-problem-main').textContent=ST.selProblem?.label||ST.selInterv?.key||'—';
     document.querySelectorAll('.e-btn').forEach(b=>{b.classList.toggle('selected',b.dataset.val===ST.emojiPick)});
   }else if(!ST.history.length){
     document.getElementById('ci-initial').style.display='block';
