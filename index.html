@@ -546,7 +546,9 @@ textarea.ta:focus{border-color:var(--orange)}
 </div>
 
 <script>
-// ═══════════ STATE ═══════════
+// ═══════════ CONFIG ═══════════
+// Cambia esta URL por la de tu proyecto Vercel tras desplegarlo
+const PROXY_URL = 'https://iaklaizen.molinosjon.workers.dev';
 const ST={user:'',thermo:null,diagDone:false,diagData:null,problems:[],aiDiag:null,aiIntervs:{},selProblem:null,selInterv:null,emojiPick:null,history:[]};
 function save(){try{localStorage.setItem('klz3',JSON.stringify(ST))}catch(e){}}
 function load(){try{const d=localStorage.getItem('klz3');if(d)Object.assign(ST,JSON.parse(d))}catch(e){}}
@@ -658,7 +660,7 @@ Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta (sin mark
 }`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch(PROXY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -844,7 +846,7 @@ Devuelve ÚNICAMENTE un JSON válido (sin markdown):
 }`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch(PROXY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
