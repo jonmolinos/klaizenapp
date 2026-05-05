@@ -665,6 +665,7 @@ Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta (sin mark
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-opus-4-5',
+        max_tokens:1000,
         messages:[{role:'user',content:prompt}]
       })
     });
@@ -850,6 +851,7 @@ Devuelve ÚNICAMENTE un JSON válido (sin markdown):
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-opus-4-5',
+        max_tokens:2000,
         messages:[{role:'user',content:prompt}]
       })
     });
