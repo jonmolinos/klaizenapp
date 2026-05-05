@@ -316,6 +316,49 @@ textarea.ta:focus{border-color:var(--orange)}
               </select>
             </div>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">Nº aproximado de alumnos</label>
+              <select class="inp" id="d-nalumnos">
+                <option>Menos de 10</option>
+                <option selected>Entre 10 y 20</option>
+                <option>Entre 20 y 30</option>
+                <option>Más de 30</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">¿Cuánto llevas con este grupo?</label>
+              <select class="inp" id="d-tiempo">
+                <option>Menos de 1 mes</option>
+                <option selected>1 a 3 meses</option>
+                <option>3 a 6 meses</option>
+                <option>Más de 6 meses</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">Momento del día</label>
+              <select class="inp" id="d-momento">
+                <option>Lunes 1ª hora</option>
+                <option>Mañana (antes del recreo)</option>
+                <option selected>Mañana (después del recreo)</option>
+                <option>Última hora de la mañana</option>
+                <option>Tarde</option>
+                <option>Viernes última hora</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">¿Hay NEE relevantes?</label>
+              <select class="inp" id="d-nee">
+                <option value="no">No / No significativas</option>
+                <option value="tdah">TDAH o similar</option>
+                <option value="conducta">Problemas de conducta</option>
+                <option value="multiple">Varias NEE</option>
+                <option value="si">Sí (sin especificar)</option>
+              </select>
+            </div>
+          </div>
           <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:8px">¿Eres tutor/a de este grupo?</label>
           <div class="radio-row">
             <div class="radio-pill"><input type="radio" name="tutor" id="t-si" value="si"><label for="t-si">✅ Sí, soy tutor/a</label></div>
@@ -351,8 +394,10 @@ textarea.ta:focus{border-color:var(--orange)}
           <div class="slider-row"><div class="slider-head"><span>🔊 Nivel de ruido</span><span class="slider-val" id="v-ruido">3</span></div><input type="range" min="1" max="5" value="3" id="s-ruido" oninput="upd(this,'v-ruido')"></div>
           <div class="slider-row"><div class="slider-head"><span>🙋 Interrupciones</span><span class="slider-val" id="v-inter">3</span></div><input type="range" min="1" max="5" value="3" id="s-inter" oninput="upd(this,'v-inter')"></div>
           <div class="slider-row"><div class="slider-head"><span>👁️ Atención del grupo</span><span class="slider-val" id="v-aten">3</span></div><input type="range" min="1" max="5" value="3" id="s-aten" oninput="upd(this,'v-aten')"></div>
+          <div class="slider-row"><div class="slider-head"><span>😶 Apatía / desconexión</span><span class="slider-val" id="v-apatia">3</span></div><input type="range" min="1" max="5" value="3" id="s-apatia" oninput="upd(this,'v-apatia')"></div>
           <div class="slider-row"><div class="slider-head"><span>⚡ Conflictos entre alumnos</span><span class="slider-val" id="v-conf">2</span></div><input type="range" min="1" max="5" value="2" id="s-conf" oninput="upd(this,'v-conf')"></div>
           <div class="slider-row"><div class="slider-head"><span>🤝 Respeto hacia el docente</span><span class="slider-val" id="v-resp">3</span></div><input type="range" min="1" max="5" value="3" id="s-resp" oninput="upd(this,'v-resp')"></div>
+          <div class="slider-row"><div class="slider-head"><span>🚪 Absentismo / faltas</span><span class="slider-val" id="v-absen">2</span></div><input type="range" min="1" max="5" value="2" id="s-absen" oninput="upd(this,'v-absen')"></div>
           <div class="divider"></div>
           <div class="sec-label">Autorregulación</div>
           <div class="slider-row"><div class="slider-head"><span>💥 Impulsividad</span><span class="slider-val" id="v-impul">3</span></div><input type="range" min="1" max="5" value="3" id="s-impul" oninput="upd(this,'v-impul')"></div>
@@ -605,14 +650,20 @@ async function runAnalysis(){
         a=+document.getElementById('s-aten').value,c=+document.getElementById('s-conf').value,
         re=+document.getElementById('s-resp').value,im=+document.getElementById('s-impul').value,
         fr=+document.getElementById('s-frus').value,au=+document.getElementById('s-auto').value,
-        es=+document.getElementById('s-estres').value,ct=+document.getElementById('s-ctrl').value;
+        es=+document.getElementById('s-estres').value,ct=+document.getElementById('s-ctrl').value,
+        apatia=+document.getElementById('s-apatia').value,
+        absen=+document.getElementById('s-absen').value;
   const tutor=document.querySelector('input[name=tutor]:checked')?.value||'no';
   const subj=document.getElementById('d-subj').value.trim()||'sin especificar';
   const stage=document.getElementById('d-stage').value;
+  const nalumnos=document.getElementById('d-nalumnos').value;
+  const tiempo=document.getElementById('d-tiempo').value;
+  const momento=document.getElementById('d-momento').value;
+  const nee=document.getElementById('d-nee').value;
   const thermoLabels={caotic:'Caótico (sin control)',unstable:'Inestable (intermitente)',improving:'Mejorando (con altibajos)',stable:'Estable (buen clima)'};
   const thermo=thermoLabels[ST.thermo]||'No indicado';
 
-  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,tutor,subj,stage};
+  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,apatia,absen,tutor,subj,stage,nalumnos,tiempo,momento,nee};
   ST.diagDone=true; ST.selProblem=null; ST.selInterv=null; ST.aiDiag=null; ST.aiIntervs={};
   save();
 
@@ -628,6 +679,10 @@ async function runAnalysis(){
 DATOS DEL DOCENTE:
 - Asignatura: ${subj}
 - Etapa: ${stage}
+- Nº de alumnos: ${nalumnos}
+- Tiempo con el grupo: ${tiempo}
+- Momento del día: ${momento}
+- NEE relevantes: ${nee==='no'?'No significativas':nee}
 - ¿Es tutor/a?: ${tutor==='si'?'Sí':'No'}
 - Percepción del clima hoy: ${thermo}
 
@@ -635,13 +690,21 @@ INDICADORES (escala 1=mínimo, 5=máximo):
 - Nivel de ruido: ${r}/5
 - Interrupciones: ${i}/5
 - Atención del grupo: ${a}/5 (5=máxima atención)
+- Apatía / desconexión: ${apatia}/5 (5=máxima apatía)
 - Conflictos entre alumnos: ${c}/5
 - Respeto hacia el docente: ${re}/5 (5=máximo respeto)
+- Absentismo / faltas: ${absen}/5 (5=absentismo muy alto)
 - Impulsividad: ${im}/5
 - Tolerancia a la frustración: ${fr}/5 (5=máxima tolerancia)
 - Autonomía en el trabajo: ${au}/5 (5=máxima autonomía)
 - Estrés docente: ${es}/5
 - Sensación de control: ${ct}/5 (5=máximo control)
+
+INSTRUCCIONES:
+- Ten muy en cuenta el momento del día y el tiempo con el grupo para contextualizar
+- Si hay NEE, refléjalo en el diagnóstico
+- Si la apatía o el absentismo son altos, deben aparecer como problema principal o secundario
+- Habla siempre en segunda persona al docente, con empatía y sin tecnicismos
 
 Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta (sin markdown, sin explicaciones):
 {
@@ -795,19 +858,28 @@ async function fetchIntervenciones(problema){
 CONTEXTO:
 - Asignatura: ${dd.subj||'no especificada'}
 - Etapa: ${dd.stage||'no especificada'}
+- Nº de alumnos: ${dd.nalumnos||'no especificado'}
+- Tiempo con el grupo: ${dd.tiempo||'no especificado'}
+- Momento del día: ${dd.momento||'no especificado'}
+- NEE relevantes: ${dd.nee==='no'?'No significativas':dd.nee||'no especificadas'}
 - Es tutor/a: ${tutor?'Sí':'No'}
 - Problema a trabajar: "${problema}"
+- Apatía/desconexión: ${dd.apatia||3}/5
+- Absentismo: ${dd.absen||2}/5
 - Estrés docente: ${dd.es||3}/5
-- Nivel de ruido: ${dd.r||3}/5, Interrupciones: ${dd.i||3}/5
-- Atención: ${dd.a||3}/5, Conflictos: ${dd.c||3}/5
+- Nivel de ruido: ${dd.r||3}/5
+- Interrupciones: ${dd.i||3}/5
+- Atención: ${dd.a||3}/5
+- Conflictos: ${dd.c||3}/5
 - Sensación de control: ${dd.ct||3}/5
 
-CRITERIOS OBLIGATORIOS para las intervenciones:
-- Deben ser fáciles de aplicar (sin preparación elaborada)
+CRITERIOS OBLIGATORIOS:
+- Intervenciones fáciles de aplicar (sin preparación elaborada)
 - Alto impacto inmediato y visible
 - El docente debe sentirse bien y con control después de aplicarlas
-- Lenguaje práctico, directo, sin teoría pedagógica
-- Scripts realistas que un docente real diría
+- Adaptadas al momento del día y número de alumnos indicados
+- Si hay NEE, tenerlas en cuenta
+- Lenguaje práctico, directo, scripts realistas que un docente real diría
 
 Devuelve ÚNICAMENTE un JSON válido (sin markdown):
 {
