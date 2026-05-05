@@ -627,8 +627,31 @@ function switchTab(t){
 // ═══════════ INIT ═══════════
 function initApp(){
   initSliders();
+  restoreContextForm();
   if(ST.diagDone && ST.aiDiag){showAIDiagResult();goDS(3,true)}
   renderNotifs();
+}
+
+function restoreContextForm(){
+  // Restaura el contexto guardado en los campos del formulario
+  const d=ST.diagData;
+  if(!d)return;
+  if(d.subj) document.getElementById('d-subj').value=d.subj;
+  if(d.stage){const s=document.getElementById('d-stage');[...s.options].forEach(o=>{if(o.value===d.stage||o.text===d.stage)s.value=o.value});}
+  if(d.nalumnos){const s=document.getElementById('d-nalumnos');[...s.options].forEach(o=>{if(o.value===d.nalumnos||o.text===d.nalumnos)s.value=o.value});}
+  if(d.tiempo){const s=document.getElementById('d-tiempo');[...s.options].forEach(o=>{if(o.value===d.tiempo||o.text===d.tiempo)s.value=o.value});}
+  if(d.momento){const s=document.getElementById('d-momento');[...s.options].forEach(o=>{if(o.value===d.momento||o.text===d.momento)s.value=o.value});}
+  if(d.nee) document.getElementById('d-nee').value=d.nee;
+  if(d.tutor){document.getElementById('t-si').checked=d.tutor==='si';document.getElementById('t-no').checked=d.tutor!=='si';}
+  // Restaurar sliders
+  const sliders={r:'s-ruido',i:'s-inter',a:'s-aten',apatia:'s-apatia',c:'s-conf',re:'s-resp',absen:'s-absen',im:'s-impul',fr:'s-frus',au:'s-auto',es:'s-estres',ct:'s-ctrl'};
+  const vals={r:'v-ruido',i:'v-inter',a:'v-aten',apatia:'v-apatia',c:'v-conf',re:'v-resp',absen:'v-absen',im:'v-impul',fr:'v-frus',au:'v-auto',es:'v-estres',ct:'v-ctrl'};
+  Object.entries(sliders).forEach(([key,id])=>{
+    if(d[key]!=null){
+      const el=document.getElementById(id);
+      if(el){el.value=d[key];setSB(el);document.getElementById(vals[key]).textContent=d[key];}
+    }
+  });
 }
 function initSliders(){document.querySelectorAll('input[type=range]').forEach(setSB)}
 function setSB(el){const p=(el.value-1)/4*100;el.style.background=`linear-gradient(to right,var(--orange) ${p}%,var(--orange) ${p}%,#E2E8F0 ${p}%,#E2E8F0 100%)`}
@@ -666,6 +689,37 @@ async function runAnalysis(){
   ST.diagData={r,i,a,c,re,im,fr,au,es,ct,apatia,absen,tutor,subj,stage,nalumnos,tiempo,momento,nee};
   ST.diagDone=true; ST.selProblem=null; ST.selInterv=null; ST.aiDiag=null; ST.aiIntervs={};
   save();
+
+  // Enviar contexto a Formspree inmediatamente (no esperar al check-in)
+  fetch('https://formspree.io/f/xkoyjdde',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({
+      '📋 Tipo de registro': 'DIAGNÓSTICO INICIAL',
+      '👤 Docente': ST.user||'—',
+      '📅 Fecha': new Date().toLocaleString('es-ES'),
+      '📚 Asignatura': subj,
+      '🎓 Etapa': stage,
+      '👥 Nº alumnos': nalumnos,
+      '⏱️ Tiempo con el grupo': tiempo,
+      '🕐 Momento del día': momento,
+      '♿ NEE': nee==='no'?'No significativas':nee,
+      '👨‍🏫 Tutor/a': tutor==='si'?'Sí':'No',
+      '🌡️ Termómetro': thermo,
+      '📊 Ruido': r+'/5',
+      '📊 Interrupciones': i+'/5',
+      '📊 Atención': a+'/5',
+      '📊 Apatía': apatia+'/5',
+      '📊 Conflictos': c+'/5',
+      '📊 Respeto': re+'/5',
+      '📊 Absentismo': absen+'/5',
+      '📊 Impulsividad': im+'/5',
+      '📊 Frustración': fr+'/5',
+      '📊 Autonomía': au+'/5',
+      '📊 Estrés docente': es+'/5',
+      '📊 Control docente': ct+'/5',
+    })
+  }).catch(()=>{});
 
   // Show loading state
   goDS(3);
