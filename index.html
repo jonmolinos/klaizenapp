@@ -349,12 +349,12 @@ textarea.ta:focus{border-color:var(--orange)}
               </select>
             </div>
             <div>
-              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">¿Hay NEE relevantes?</label>
+              <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:5px">¿Hay ACNEAE relevantes?</label>
               <select class="inp" id="d-nee">
                 <option value="no">No / No significativas</option>
                 <option value="tdah">TDAH o similar</option>
                 <option value="conducta">Problemas de conducta</option>
-                <option value="multiple">Varias NEE</option>
+                <option value="multiple">Varias ACNEAE</option>
                 <option value="si">Sí (sin especificar)</option>
               </select>
             </div>
@@ -363,6 +363,10 @@ textarea.ta:focus{border-color:var(--orange)}
           <div class="radio-row">
             <div class="radio-pill"><input type="radio" name="tutor" id="t-si" value="si"><label for="t-si">✅ Sí, soy tutor/a</label></div>
             <div class="radio-pill"><input type="radio" name="tutor" id="t-no" value="no" checked><label for="t-no">No soy tutor/a</label></div>
+          </div>
+          <div style="margin-top:16px">
+            <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:6px">¿Hay algo concreto que quieras trabajar? <span style="font-weight:400;color:var(--slate-light)">(opcional)</span></label>
+            <textarea class="ta" id="d-problema-libre" rows="2" style="min-height:70px" placeholder="Ej: Tengo un alumno que boicotea constantemente la clase, o el grupo no trabaja en equipo…"></textarea>
           </div>
         </div>
         <div class="card">
@@ -568,6 +572,14 @@ textarea.ta:focus{border-color:var(--orange)}
           <textarea class="ta" id="fb-features" placeholder="¿Qué te gustaría que Klaizen hiciera y que aún no hace?"></textarea>
         </div>
 
+        <div class="card">
+          <p class="card-title">¿Te gustaría implementar Klaizen en tu centro?</p>
+          <p class="card-sub" style="margin-bottom:14px">Si ves utilidad y quieres que lo valoremos juntos, déjanos el correo de dirección u orientación de tu centro</p>
+          <label style="font-size:12px;font-weight:600;color:var(--slate-mid);display:block;margin-bottom:6px">Correo del centro <span style="font-weight:400;color:var(--slate-light)">(opcional)</span></label>
+          <input type="email" class="inp" id="fb-centro-email" placeholder="direccion@micentro.es o orientacion@micentro.es">
+          <p style="font-size:11px;color:var(--slate-light);margin-top:6px">Solo nos pondremos en contacto si nos das el OK. Sin spam.</p>
+        </div>
+
         <button class="btn-primary" onclick="submitFeedback()">📤 Guardar registro</button>
       </div>
       <div id="ci-initial">
@@ -643,6 +655,7 @@ function restoreContextForm(){
   if(d.momento){const s=document.getElementById('d-momento');[...s.options].forEach(o=>{if(o.value===d.momento||o.text===d.momento)s.value=o.value});}
   if(d.nee) document.getElementById('d-nee').value=d.nee;
   if(d.tutor){document.getElementById('t-si').checked=d.tutor==='si';document.getElementById('t-no').checked=d.tutor!=='si';}
+  if(d.problemaLibre) document.getElementById('d-problema-libre').value=d.problemaLibre;
   // Restaurar sliders
   const sliders={r:'s-ruido',i:'s-inter',a:'s-aten',apatia:'s-apatia',c:'s-conf',re:'s-resp',absen:'s-absen',im:'s-impul',fr:'s-frus',au:'s-auto',es:'s-estres',ct:'s-ctrl'};
   const vals={r:'v-ruido',i:'v-inter',a:'v-aten',apatia:'v-apatia',c:'v-conf',re:'v-resp',absen:'v-absen',im:'v-impul',fr:'v-frus',au:'v-auto',es:'v-estres',ct:'v-ctrl'};
@@ -683,10 +696,11 @@ async function runAnalysis(){
   const tiempo=document.getElementById('d-tiempo').value;
   const momento=document.getElementById('d-momento').value;
   const nee=document.getElementById('d-nee').value;
+  const problemaLibre=document.getElementById('d-problema-libre').value.trim();
   const thermoLabels={caotic:'Caótico (sin control)',unstable:'Inestable (intermitente)',improving:'Mejorando (con altibajos)',stable:'Estable (buen clima)'};
   const thermo=thermoLabels[ST.thermo]||'No indicado';
 
-  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,apatia,absen,tutor,subj,stage,nalumnos,tiempo,momento,nee};
+  ST.diagData={r,i,a,c,re,im,fr,au,es,ct,apatia,absen,tutor,subj,stage,nalumnos,tiempo,momento,nee,problemaLibre};
   ST.diagDone=true; ST.selProblem=null; ST.selInterv=null; ST.aiDiag=null; ST.aiIntervs={};
   save();
 
@@ -703,7 +717,7 @@ async function runAnalysis(){
       '👥 Nº alumnos': nalumnos,
       '⏱️ Tiempo con el grupo': tiempo,
       '🕐 Momento del día': momento,
-      '♿ NEE': nee==='no'?'No significativas':nee,
+      '♿ ACNEAE': nee==='no'?'No significativas':nee,
       '👨‍🏫 Tutor/a': tutor==='si'?'Sí':'No',
       '🌡️ Termómetro': thermo,
       '📊 Ruido': r+'/5',
@@ -718,6 +732,7 @@ async function runAnalysis(){
       '📊 Autonomía': au+'/5',
       '📊 Estrés docente': es+'/5',
       '📊 Control docente': ct+'/5',
+      '✍️ Problema específico': problemaLibre||'—',
     })
   }).catch(()=>{});
 
@@ -736,9 +751,10 @@ DATOS DEL DOCENTE:
 - Nº de alumnos: ${nalumnos}
 - Tiempo con el grupo: ${tiempo}
 - Momento del día: ${momento}
-- NEE relevantes: ${nee==='no'?'No significativas':nee}
+- ACNEAE relevantes: ${nee==='no'?'No significativas':nee}
 - ¿Es tutor/a?: ${tutor==='si'?'Sí':'No'}
 - Percepción del clima hoy: ${thermo}
+${problemaLibre?`- Problema específico que el docente quiere trabajar: "${problemaLibre}"`:''}
 
 INDICADORES (escala 1=mínimo, 5=máximo):
 - Nivel de ruido: ${r}/5
@@ -915,9 +931,10 @@ CONTEXTO:
 - Nº de alumnos: ${dd.nalumnos||'no especificado'}
 - Tiempo con el grupo: ${dd.tiempo||'no especificado'}
 - Momento del día: ${dd.momento||'no especificado'}
-- NEE relevantes: ${dd.nee==='no'?'No significativas':dd.nee||'no especificadas'}
+- ACNEAE relevantes: ${dd.nee==='no'?'No significativas':dd.nee||'no especificadas'}
 - Es tutor/a: ${tutor?'Sí':'No'}
 - Problema a trabajar: "${problema}"
+${dd.problemaLibre?`- Contexto adicional del docente: "${dd.problemaLibre}"`:''}
 - Apatía/desconexión: ${dd.apatia||3}/5
 - Absentismo: ${dd.absen||2}/5
 - Estrés docente: ${dd.es||3}/5
@@ -1089,6 +1106,7 @@ async function submitFeedback(){
   const fbWorked=document.getElementById('fb-worked').value.trim();
   const fbImprove=document.getElementById('fb-improve').value.trim();
   const fbFeatures=document.getElementById('fb-features').value.trim();
+  const centroemail=document.getElementById('fb-centro-email').value.trim();
   const now=new Date();
 
   const record={
@@ -1099,7 +1117,7 @@ async function submitFeedback(){
     applied:applied.value,
     result:ST.emojiPick||'igual',
     obs, fbWorked, fbImprove,
-    wouldUse, wantedFeatures, fbFeatures,
+    wouldUse, wantedFeatures, fbFeatures, centroemail,
     date:now.toLocaleDateString('es-ES'),
     ts:Date.now()
   };
@@ -1126,6 +1144,7 @@ async function submitFeedback(){
       '🔁 ¿Seguiría usando Klaizen?': ({si:'Sí',quiza:'Quizás',no:'Probablemente no'})[wouldUse]||'—',
       '🚀 Funcionalidades deseadas': wantedFeatures.join(', ')||'—',
       '💡 Otras ideas': fbFeatures||'—',
+      '🏫 Correo centro para implementación': centroemail||'—',
     })
   }).catch(()=>{}); // silencioso si falla la red
 
@@ -1136,6 +1155,7 @@ async function submitFeedback(){
   document.getElementById('fb-worked').value='';
   document.getElementById('fb-improve').value='';
   document.getElementById('fb-features').value='';
+  document.getElementById('fb-centro-email').value='';
   document.getElementById('success-overlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('success-overlay').classList.remove('show');switchTab('checkin')}
